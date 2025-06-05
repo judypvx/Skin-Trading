@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import NavigationTabs from "@/components/trading/NavigationTabs";
 import StatsPanel from "@/components/trading/StatsPanel";
 import TradingTable from "@/components/trading/TradingTable";
 import ImportDialog from "@/components/trading/ImportDialog";
@@ -18,21 +19,21 @@ import {
   calculateStats,
   TradingStats,
 } from "@/lib/trading-data";
-import { BarChart3, Settings, User, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
+import {
+  BarChart3,
+  Settings,
+  TrendingUp,
+  FileText,
+  Download,
+  Upload,
+} from "lucide-react";
+import { toast } from "sonner";
 
 const Index = () => {
   const [items, setItems] = useState<TradingItem[]>(mockTradingItems);
   const [stats, setStats] = useState<TradingStats>(
     calculateStats(mockTradingItems),
   );
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  // Ensure theme is mounted to avoid hydration issues
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     const newStats = calculateStats(items);
@@ -47,60 +48,61 @@ const Index = () => {
 
   const handleImportSuccess = () => {
     // In a real app, this would refresh the data from the API
-    console.log("Import successful - refreshing data...");
+    toast.success("Import successful - refreshing data...");
   };
 
-  if (!mounted) {
-    return null;
-  }
+  const handleExportTrades = () => {
+    const csvContent = items
+      .map(
+        (item) =>
+          `${item.itemName},${item.buyPrice},${item.buyDate},${item.market},${item.assetId},${item.status},${item.sellPrice || ""},${item.sellDate || ""},${item.profit},${item.profitPercentage}`,
+      )
+      .join("\n");
+
+    const blob = new Blob(
+      [
+        `Item Name,Buy Price,Buy Date,Market,Asset ID,Status,Sell Price,Sell Date,Profit,Profit %\n${csvContent}`,
+      ],
+      { type: "text/csv" },
+    );
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "trading-history.csv";
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    toast.success("Trading data exported to CSV");
+  };
+
+  const getProfitStatus = () => {
+    if (stats.totalProfit > 0) {
+      return {
+        status: "Profitable",
+        color: "text-green-600",
+        bgColor: "bg-green-100 dark:bg-green-900",
+      };
+    } else if (stats.totalProfit === 0) {
+      return {
+        status: "Break Even",
+        color: "text-yellow-600",
+        bgColor: "bg-yellow-100 dark:bg-yellow-900",
+      };
+    } else {
+      return {
+        status: "At Loss",
+        color: "text-red-600",
+        bgColor: "bg-red-100 dark:bg-red-900",
+      };
+    }
+  };
+
+  const profitStatus = getProfitStatus();
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <BarChart3 className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">Skin Trading Dashboard</h1>
-                <p className="text-sm text-muted-foreground">
-                  Track and analyze your CS:GO skin investments
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-4 w-4" />
-                ) : (
-                  <Moon className="h-4 w-4" />
-                )}
-                <span className="sr-only">Toggle theme</span>
-              </Button>
-
-              <ImportDialog onImportSuccess={handleImportSuccess} />
-
-              <Button variant="outline" size="sm" className="gap-2">
-                <Settings className="h-4 w-4" />
-                Settings
-              </Button>
-
-              <Button variant="outline" size="sm" className="gap-2">
-                <User className="h-4 w-4" />
-                Profile
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Navigation */}
+      <NavigationTabs />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
@@ -109,20 +111,24 @@ const Index = () => {
           <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-primary/20">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg">
-                    Welcome back, Trader!
-                  </CardTitle>
-                  <CardDescription>
-                    Here's an overview of your skin trading performance across
-                    all marketplaces.
-                  </CardDescription>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <BarChart3 className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">
+                      Welcome back, Trader!
+                    </CardTitle>
+                    <CardDescription>
+                      Track and analyze your CS:GO skin investments across all
+                      marketplaces
+                    </CardDescription>
+                  </div>
                 </div>
                 <Badge
-                  variant="secondary"
-                  className="bg-primary/10 text-primary"
+                  className={`${profitStatus.bgColor} ${profitStatus.color}`}
                 >
-                  Live Data
+                  Portfolio {profitStatus.status}
                 </Badge>
               </div>
             </CardHeader>
@@ -154,6 +160,37 @@ const Index = () => {
 
         <Separator className="my-6" />
 
+        {/* Action Bar */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex gap-2">
+            <ImportDialog onImportSuccess={handleImportSuccess} />
+            <Button variant="outline" className="gap-2">
+              <Upload className="h-4 w-4" />
+              Quick Add Trade
+            </Button>
+          </div>
+
+          <div className="flex gap-2 ml-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportTrades}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Analytics
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
+            </Button>
+          </div>
+        </div>
+
         {/* Trading Table */}
         <TradingTable items={items} onUpdateItem={handleUpdateItem} />
 
@@ -171,6 +208,10 @@ const Index = () => {
               <Button variant="outline" className="w-full justify-start gap-2">
                 <Settings className="h-4 w-4" />
                 Manage Tags
+              </Button>
+              <Button variant="outline" className="w-full justify-start gap-2">
+                <FileText className="h-4 w-4" />
+                Generate Report
               </Button>
             </CardContent>
           </Card>
@@ -208,6 +249,15 @@ const Index = () => {
                     Slow
                   </Badge>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Steam Market</span>
+                  <Badge
+                    variant="outline"
+                    className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+                  >
+                    Manual
+                  </Badge>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -230,6 +280,10 @@ const Index = () => {
                   <span className="text-muted-foreground">Last purchase:</span>
                   <span>3 days ago</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total trades:</span>
+                  <span className="font-medium">{items.length}</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -238,7 +292,8 @@ const Index = () => {
         {/* Footer */}
         <footer className="mt-12 pt-6 border-t text-center text-sm text-muted-foreground">
           <p>
-            Skin Trading Dashboard v1.0 • Built for serious traders •
+            Skin Trading Dashboard v1.0 • Tracking {items.length} items across{" "}
+            {new Set(items.map((i) => i.market)).size} marketplaces •
             <Button variant="link" className="p-0 h-auto text-sm">
               Documentation
             </Button>
