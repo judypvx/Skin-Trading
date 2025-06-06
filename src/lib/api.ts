@@ -16,41 +16,51 @@ export interface ApiCredentials {
 // Placeholder API functions for future implementation
 export const importFromLisSkins = async (
   apiKey: string,
+  accountId?: string,
+  targetMarketplace?: string,
 ): Promise<ImportResult> => {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
+  const itemCount = Math.floor(Math.random() * 8) + 2; // 2-9 items
+
   return {
     success: true,
-    itemsImported: 3,
-    message: "Successfully imported 3 items from Lis-Skins",
+    itemCount,
+    message: `Successfully imported ${itemCount} items from Lis-Skins`,
     items: [],
   };
 };
 
 export const importFromMarketCSGO = async (
   apiKey: string,
+  accountId?: string,
+  targetMarketplace?: string,
 ): Promise<ImportResult> => {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 2500));
 
+  const itemCount = Math.floor(Math.random() * 6) + 1; // 1-6 items
+
   return {
     success: true,
-    itemsImported: 2,
-    message: "Successfully imported 2 items from Market.CSGO",
+    itemCount,
+    message: `Successfully imported ${itemCount} items from Market.CSGO`,
     items: [],
   };
 };
 
 export const importFromSteamMarket = async (
   apiKey: string,
+  accountId?: string,
+  targetMarketplace?: string,
 ): Promise<ImportResult> => {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
   return {
     success: false,
-    itemsImported: 0,
+    itemCount: 0,
     message: "Steam Market API integration coming soon",
     items: [],
   };
