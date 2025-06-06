@@ -192,7 +192,9 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
           ? item.status === "unsold" ||
             item.status === "waiting_unlock" ||
             item.status === "trade_ban"
-          : item.status === "sold";
+          : activeTab === "ready"
+            ? item.status === "ready_to_trade"
+            : item.status === "sold";
 
       // Multi-select market filtering - if no markets selected, show all
       const matchesMarket =
