@@ -596,7 +596,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   );
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
