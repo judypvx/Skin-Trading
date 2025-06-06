@@ -1096,6 +1096,58 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                           {column.id === "profit" && getProfitDisplay(item)}
                           {column.id === "stickersCharm" &&
                             getStickersAndCharmDisplay(item)}
+                          {column.id === "marketLinks" && (
+                            <div className="flex items-center justify-center gap-1">
+                              {item.marketLinks.lisSkins && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <div className="w-6 h-6 bg-blue-100 border border-blue-300 rounded flex items-center justify-center cursor-pointer hover:bg-blue-200">
+                                        <span className="text-xs font-bold">
+                                          L
+                                        </span>
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Lis-Skins</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                              {item.marketLinks.marketCSGO && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <div className="w-6 h-6 bg-green-100 border border-green-300 rounded flex items-center justify-center cursor-pointer hover:bg-green-200">
+                                        <span className="text-xs font-bold">
+                                          M
+                                        </span>
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Market.CSGO</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                              {item.marketLinks.steamMarket && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <div className="w-6 h-6 bg-gray-100 border border-gray-300 rounded flex items-center justify-center cursor-pointer hover:bg-gray-200">
+                                        <span className="text-xs font-bold">
+                                          S
+                                        </span>
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Steam Market</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                            </div>
+                          )}
                         </TableCell>
                       ))}
                       <TableCell>
