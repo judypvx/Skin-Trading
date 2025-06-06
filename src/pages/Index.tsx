@@ -93,7 +93,7 @@ const Index = () => {
     const csvContent = items
       .map(
         (item) =>
-          `${item.itemName},${item.buyPrice},${item.buyDate},${item.market},${item.assetId},${item.status},${item.sellPrice || ""},${item.sellDate || ""},${item.profit},${item.profitPercentage}`,
+          `${item.itemName},${item.buyPrice},${item.buyDate},${item.market},${item.status},${item.sellPrice || ""},${item.sellDate || ""},${item.profit},${item.profitPercentage}`,
       )
       .join("\n");
 
