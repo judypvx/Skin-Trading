@@ -320,7 +320,7 @@ const ImportDialog = ({ onImportSuccess }: ImportDialogProps) => {
                 {availableAccounts.map((account) => (
                   <DropdownMenuItem
                     key={account.id}
-                    className="flex items-center gap-2 cursor-pointer py-3"
+                    className="flex items-center gap-2 cursor-pointer"
                     onSelect={(e) => e.preventDefault()}
                   >
                     <Checkbox
@@ -333,19 +333,12 @@ const ImportDialog = ({ onImportSuccess }: ImportDialogProps) => {
                       }
                       disabled={allAccountsSelected}
                     />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 font-medium">
-                        <User className="h-4 w-4" />
-                        {account.nickname}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Steam Balance: {formatCurrency(account.steamBalance)} |
-                        Inventory: {formatCurrency(account.inventoryValue)}
-                      </div>
+                    <div className="flex items-center gap-2 font-medium">
+                      <User className="h-4 w-4" />
+                      {account.nickname}
                     </div>
                   </DropdownMenuItem>
                 ))}
-
                 {selectedAccounts.length > 0 && (
                   <>
                     <DropdownMenuSeparator />
