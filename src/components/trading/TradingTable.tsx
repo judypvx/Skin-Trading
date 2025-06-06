@@ -923,6 +923,319 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
             )}
           </TabsContent>
 
+          <TabsContent value="ready" className="space-y-4 mt-4">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search ready to trade items..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Filter className="h-4 w-4" />
+                      Markets
+                      {marketFilters.length > 0 && (
+                        <Badge variant="secondary" className="ml-1">
+                          {marketFilters.length}
+                        </Badge>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Filter by Market</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {Array.from(new Set(items.map((item) => item.market))).map(
+                      (market) => (
+                        <DropdownMenuItem
+                          key={market}
+                          className="flex items-center space-x-2"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <Checkbox
+                            checked={marketFilters.includes(market)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setMarketFilters([...marketFilters, market]);
+                              } else {
+                                setMarketFilters(
+                                  marketFilters.filter((f) => f !== market),
+                                );
+                              }
+                            }}
+                          />
+                          <span>{market}</span>
+                        </DropdownMenuItem>
+                      ),
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Users className="h-4 w-4" />
+                      Accounts
+                      {accountFilters.length > 0 && (
+                        <Badge variant="secondary" className="ml-1">
+                          {accountFilters.length}
+                        </Badge>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Filter by Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {mockSteamAccountsBasic
+                      .filter((account) => account.id !== "all")
+                      .map((account) => (
+                        <DropdownMenuItem
+                          key={account.id}
+                          className="flex items-center space-x-2"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <Checkbox
+                            checked={accountFilters.includes(account.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setAccountFilters([
+                                  ...accountFilters,
+                                  account.id,
+                                ]);
+                              } else {
+                                setAccountFilters(
+                                  accountFilters.filter(
+                                    (f) => f !== account.id,
+                                  ),
+                                );
+                              }
+                            }}
+                          />
+                          <span>{account.nickname}</span>
+                        </DropdownMenuItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {filteredAndSortedItems.length > 0 ? (
+              <div className="rounded-md border overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {visibleColumns.includes("image") && (
+                        <TableHead className="w-20 text-center">
+                          <div className="flex items-center justify-center">
+                            Image
+                          </div>
+                        </TableHead>
+                      )}
+                      {visibleColumns.includes("item") && (
+                        <TableHead className="min-w-[250px] text-center">
+                          <div className="flex items-center justify-center cursor-pointer">
+                            Item
+                          </div>
+                        </TableHead>
+                      )}
+                      {visibleColumns.includes("buyPrice") && (
+                        <TableHead
+                          className="text-center cursor-pointer"
+                          onClick={() => handleSort("buyPrice")}
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            Buy Price
+                            <ArrowUpDown className="h-4 w-4" />
+                          </div>
+                        </TableHead>
+                      )}
+                      {visibleColumns.includes("buyDate") && (
+                        <TableHead
+                          className="text-center cursor-pointer"
+                          onClick={() => handleSort("buyDate")}
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            Buy Date
+                            <ArrowUpDown className="h-4 w-4" />
+                          </div>
+                        </TableHead>
+                      )}
+                      {visibleColumns.includes("currentPrice") && (
+                        <TableHead className="text-center">
+                          <div className="flex items-center justify-center">
+                            Current Price
+                          </div>
+                        </TableHead>
+                      )}
+                      {visibleColumns.includes("profit") && (
+                        <TableHead className="text-center">
+                          <div className="flex items-center justify-center">
+                            Potential Profit
+                          </div>
+                        </TableHead>
+                      )}
+                      {visibleColumns.includes("stickers") && (
+                        <TableHead className="w-24 text-center">
+                          <div className="flex items-center justify-center">
+                            Stickers & Charm
+                          </div>
+                        </TableHead>
+                      )}
+                      {visibleColumns.includes("marketLinks") && (
+                        <TableHead className="w-28 text-center">
+                          <div className="flex items-center justify-center">
+                            Market Links
+                          </div>
+                        </TableHead>
+                      )}
+                      {visibleColumns.includes("status") && (
+                        <TableHead className="text-center">
+                          <div className="flex items-center justify-center">
+                            Status
+                          </div>
+                        </TableHead>
+                      )}
+                      <TableHead className="w-12 text-center">
+                        <div className="flex items-center justify-center">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </div>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAndSortedItems.map((item) => (
+                      <TableRow key={item.id}>
+                        {visibleColumns.includes("image") && (
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center">
+                              <img
+                                src={`https://community.cloudflare.steamstatic.com/economy/image/${item.assetId || "placeholder"}/96fx96f`}
+                                alt={item.itemName}
+                                className="w-12 h-12 object-contain rounded"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src =
+                                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' fill='%23f0f0f0'/%3E%3Ctext x='24' y='26' text-anchor='middle' font-family='Arial' font-size='10' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E";
+                                }}
+                              />
+                            </div>
+                          </TableCell>
+                        )}
+                        {visibleColumns.includes("item") && (
+                          <TableCell>
+                            <div className="flex items-center gap-2 max-w-[300px]">
+                              <div className="flex-shrink-0">
+                                <img
+                                  src={`https://community.cloudflare.steamstatic.com/economy/image/${item.assetId || "placeholder"}/96fx96f`}
+                                  alt={item.itemName}
+                                  className="w-12 h-12 object-contain rounded"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src =
+                                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' fill='%23f0f0f0'/%3E%3Ctext x='24' y='26' text-anchor='middle' font-family='Arial' font-size='10' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E";
+                                  }}
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="truncate font-medium">
+                                  {item.itemName}
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                        )}
+                        {visibleColumns.includes("buyPrice") && (
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center">
+                              <span className="font-medium">
+                                {formatCurrency(item.buyPrice)}
+                              </span>
+                            </div>
+                          </TableCell>
+                        )}
+                        {visibleColumns.includes("buyDate") && (
+                          <TableCell className="text-center whitespace-nowrap">
+                            <div className="flex items-center justify-center">
+                              <span>{formatDate(item.buyDate)}</span>
+                            </div>
+                          </TableCell>
+                        )}
+                        {visibleColumns.includes("currentPrice") && (
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center">
+                              <span className="font-medium">
+                                {item.currentMarketPrice
+                                  ? formatCurrency(item.currentMarketPrice)
+                                  : "—"}
+                              </span>
+                            </div>
+                          </TableCell>
+                        )}
+                        {visibleColumns.includes("profit") && (
+                          <TableCell className="text-center">
+                            {getPotentialProfitDisplay(item)}
+                          </TableCell>
+                        )}
+                        {visibleColumns.includes("stickers") && (
+                          <TableCell className="text-center">
+                            {getStickersAndCharmDisplay(item)}
+                          </TableCell>
+                        )}
+                        {visibleColumns.includes("marketLinks") && (
+                          <TableCell className="text-center">
+                            {getMarketLinksDisplay(item)}
+                          </TableCell>
+                        )}
+                        {visibleColumns.includes("status") && (
+                          <TableCell className="text-center">
+                            {getStatusBadge(item)}
+                          </TableCell>
+                        )}
+                        <TableCell className="text-center">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  navigator.clipboard.writeText(item.assetId);
+                                  toast.success("Asset ID copied to clipboard");
+                                }}
+                              >
+                                <Copy className="mr-2 h-4 w-4" />
+                                Copy Asset ID
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Star className="mr-2 h-4 w-4" />
+                                Add to Watchlist
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <h3 className="text-lg font-semibold mb-2">
+                  No Ready to Trade Items
+                </h3>
+                <p className="text-sm">No items match your current filters.</p>
+              </div>
+            )}
+          </TabsContent>
+
           <TabsContent value="history" className="space-y-4 mt-4">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col lg:flex-row gap-4">
