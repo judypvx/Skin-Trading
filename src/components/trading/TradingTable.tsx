@@ -29,6 +29,8 @@ import {
   X,
   Users,
   Check,
+  Calendar,
+  CalendarDays,
 } from "lucide-react";
 import {
   TradingItem,
