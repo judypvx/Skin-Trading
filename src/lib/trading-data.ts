@@ -1389,8 +1389,7 @@ export const calculateStats = (items: TradingItem[]): TradingStats => {
     (item) =>
       item.status === "unsold" ||
       item.status === "waiting_unlock" ||
-      item.status === "trade_ban" ||
-      item.status === "ready_to_trade",
+      item.status === "trade_ban",
   ).length;
 
   return {
