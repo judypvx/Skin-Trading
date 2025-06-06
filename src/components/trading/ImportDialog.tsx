@@ -39,7 +39,6 @@ import {
 import { toast } from "sonner";
 import { getImportFunction, validateApiKey } from "@/lib/api";
 import { mockSteamAccounts, SteamAccount } from "@/lib/account-data";
-import { formatCurrency } from "@/lib/trading-data";
 
 interface ImportDialogProps {
   onImportSuccess: () => void;
