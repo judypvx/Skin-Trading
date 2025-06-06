@@ -21,12 +21,13 @@ export interface TradingItem {
   buyDate: string;
   market: "Lis-Skins" | "Market.CSGO" | "Steam Market";
   assetId: string;
-  status: "sold" | "unsold";
+  status: "sold" | "unsold" | "locked";
   sellPrice: number | null;
   sellDate: string | null;
   sellMarket?: "Lis-Skins" | "Market.CSGO" | "Steam Market" | null;
   targetSellMarket?: "Lis-Skins" | "Market.CSGO" | "Steam Market" | null; // Selected marketplace during import
   currentMarketPrice?: number; // Current lowest price on target marketplace
+  unlock_at?: string | null; // ISO date string when item becomes tradable
   profit: number;
   profitPercentage: number;
   potentialProfit: number;
