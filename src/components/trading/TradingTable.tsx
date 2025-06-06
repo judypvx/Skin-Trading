@@ -352,6 +352,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
         item.buyPrice > 0 ? (item.potentialProfit / item.buyPrice) * 100 : 0;
 
       const isPositive = item.potentialProfit >= 0;
+      const Icon = isPositive ? TrendingUp : TrendingDown;
       const colorClass = isPositive
         ? "text-green-600 dark:text-green-400"
         : "text-red-600 dark:text-red-400";
@@ -359,15 +360,16 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
       return (
         <div className="flex items-center justify-center">
           <div className={`text-center ${colorClass}`}>
-            <div className="flex items-center gap-1 whitespace-nowrap">
+            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+              <Icon className="h-3 w-3" />
               <span className="text-xs">Potential:</span>
               <span className="font-medium">
                 {formatCurrency(item.potentialProfit)}
               </span>
-              <span className="text-xs opacity-80">
-                ({isPositive ? "+" : ""}
-                {potentialProfitPercentage.toFixed(2)}%)
-              </span>
+            </div>
+            <div className="text-xs opacity-80 mt-1">
+              ({isPositive ? "+" : ""}
+              {potentialProfitPercentage.toFixed(2)}%)
             </div>
           </div>
         </div>
