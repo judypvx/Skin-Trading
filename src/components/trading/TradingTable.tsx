@@ -334,23 +334,42 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
         : "text-red-600 dark:text-red-400";
 
       return (
-        <div
-          className={`flex items-center gap-1 ${colorClass} whitespace-nowrap`}
-        >
-          <Icon className="h-3 w-3" />
-          <span className="font-medium">{formatCurrency(item.profit)}</span>
-          <span className="text-xs">
-            ({formatPercentage(item.profitPercentage)})
-          </span>
+        <div className="flex items-center justify-center">
+          <div
+            className={`flex items-center gap-1 ${colorClass} whitespace-nowrap`}
+          >
+            <Icon className="h-3 w-3" />
+            <span className="font-medium">{formatCurrency(item.profit)}</span>
+            <span className="text-xs opacity-80">
+              ({formatPercentage(item.profitPercentage)})
+            </span>
+          </div>
         </div>
       );
     } else {
+      // Calculate potential profit percentage
+      const potentialProfitPercentage =
+        item.buyPrice > 0 ? (item.potentialProfit / item.buyPrice) * 100 : 0;
+
+      const isPositive = item.potentialProfit >= 0;
+      const colorClass = isPositive
+        ? "text-green-600 dark:text-green-400"
+        : "text-red-600 dark:text-red-400";
+
       return (
-        <div className="text-blue-600 dark:text-blue-400 whitespace-nowrap">
-          <span className="text-xs">Potential: </span>
-          <span className="font-medium">
-            {formatCurrency(item.potentialProfit)}
-          </span>
+        <div className="flex items-center justify-center">
+          <div className={`text-center ${colorClass}`}>
+            <div className="flex items-center gap-1 whitespace-nowrap">
+              <span className="text-xs">Potential:</span>
+              <span className="font-medium">
+                {formatCurrency(item.potentialProfit)}
+              </span>
+              <span className="text-xs opacity-80">
+                ({isPositive ? "+" : ""}
+                {potentialProfitPercentage.toFixed(2)}%)
+              </span>
+            </div>
+          </div>
         </div>
       );
     }
