@@ -8,6 +8,8 @@ import {
   DollarSign,
   Package,
   Bell,
+  CreditCard,
+  Banknote,
 } from "lucide-react";
 
 interface AccountStatsPanelProps {
@@ -44,30 +46,36 @@ const AccountStatsPanel = ({ stats }: AccountStatsPanelProps) => {
       color: "text-red-500",
       bgColor: "bg-red-50 dark:bg-red-950",
     },
+  ];
+
+  const balanceCards = [
     {
-      title: "Total Steam Balance",
-      value: formatCurrency(stats.totalBalance),
+      title: "Steam Balances",
+      value: formatCurrency(stats.totalSteamBalance),
       icon: DollarSign,
       color: "text-green-500",
       bgColor: "bg-green-50 dark:bg-green-950",
     },
     {
-      title: "Total Inventory Value",
-      value: formatCurrency(stats.totalInventoryValue),
-      icon: Package,
+      title: "Market.CSGO Balances",
+      value: formatCurrency(stats.totalMarketCSGOBalance),
+      icon: CreditCard,
+      color: "text-blue-500",
+      bgColor: "bg-blue-50 dark:bg-blue-950",
+    },
+    {
+      title: "Lis-Skins Balances",
+      value: formatCurrency(stats.totalLisSkinBalance),
+      icon: Banknote,
       color: "text-purple-500",
       bgColor: "bg-purple-50 dark:bg-purple-950",
     },
     {
-      title: "Trade Confirmations",
-      value: stats.totalTradeConfirmations.toString(),
-      icon: Bell,
-      color:
-        stats.totalTradeConfirmations > 0 ? "text-orange-500" : "text-gray-500",
-      bgColor:
-        stats.totalTradeConfirmations > 0
-          ? "bg-orange-50 dark:bg-orange-950"
-          : "bg-gray-50 dark:bg-gray-950",
+      title: "Total Inventory Value",
+      value: formatCurrency(stats.totalInventoryValue),
+      icon: Package,
+      color: "text-indigo-500",
+      bgColor: "bg-indigo-50 dark:bg-indigo-950",
     },
   ];
 
@@ -80,11 +88,16 @@ const AccountStatsPanel = ({ stats }: AccountStatsPanelProps) => {
     stats.totalAccounts > 0
       ? ((stats.errorAccounts / stats.totalAccounts) * 100).toFixed(1)
       : "0";
+  const totalLiquidFunds =
+    stats.totalSteamBalance +
+    stats.totalMarketCSGOBalance +
+    stats.totalLisSkinBalance;
+  const totalNetWorth = totalLiquidFunds + stats.totalInventoryValue;
 
   return (
     <div className="space-y-6">
-      {/* Main Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+      {/* Account Status Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
@@ -109,6 +122,55 @@ const AccountStatsPanel = ({ stats }: AccountStatsPanelProps) => {
           );
         })}
       </div>
+
+      {/* Balance Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {balanceCards.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card
+              key={index}
+              className="hover:shadow-lg transition-shadow duration-200"
+            >
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {stat.title}
+                </CardTitle>
+                <div className={`p-2 rounded-full ${stat.bgColor}`}>
+                  <Icon className={`h-4 w-4 ${stat.color}`} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${stat.color}`}>
+                  {stat.value}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Trade Confirmations Alert */}
+      {stats.totalTradeConfirmations > 0 && (
+        <Card className="border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-orange-800 dark:text-orange-200">
+              Pending Trade Confirmations
+            </CardTitle>
+            <div className="p-2 rounded-full bg-orange-100 dark:bg-orange-900">
+              <Bell className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+              {stats.totalTradeConfirmations}
+            </div>
+            <p className="text-sm text-orange-700 dark:text-orange-300">
+              Trade confirmations require immediate attention
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -145,14 +207,14 @@ const AccountStatsPanel = ({ stats }: AccountStatsPanelProps) => {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Financial Summary</CardTitle>
+            <CardTitle className="text-lg">Financial Overview</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm">Steam Wallets</span>
+                <span className="text-sm">Liquid Funds</span>
                 <span className="font-medium">
-                  {formatCurrency(stats.totalBalance)}
+                  {formatCurrency(totalLiquidFunds)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -162,11 +224,9 @@ const AccountStatsPanel = ({ stats }: AccountStatsPanelProps) => {
                 </span>
               </div>
               <div className="flex justify-between items-center border-t pt-3">
-                <span className="text-sm font-medium">Total Value</span>
+                <span className="text-sm font-medium">Total Net Worth</span>
                 <span className="font-bold text-lg">
-                  {formatCurrency(
-                    stats.totalBalance + stats.totalInventoryValue,
-                  )}
+                  {formatCurrency(totalNetWorth)}
                 </span>
               </div>
             </div>
@@ -175,42 +235,37 @@ const AccountStatsPanel = ({ stats }: AccountStatsPanelProps) => {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Pending Actions</CardTitle>
+            <CardTitle className="text-lg">Market Distribution</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm">Trade Confirmations</span>
-                <div className="flex items-center gap-2">
-                  {stats.totalTradeConfirmations > 0 ? (
-                    <>
-                      <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                      <span className="font-medium text-orange-600">
-                        {stats.totalTradeConfirmations}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="font-medium text-green-600">
-                        All Clear
-                      </span>
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Accounts Need Check</span>
+                <span className="text-sm">Steam Market</span>
                 <span className="font-medium">
-                  {stats.totalAccounts -
-                    stats.activeAccounts -
-                    stats.pausedAccounts}
+                  {((stats.totalSteamBalance / totalLiquidFunds) * 100).toFixed(
+                    1,
+                  )}
+                  %
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">Next Maintenance</span>
-                <span className="text-sm text-muted-foreground">
-                  In 2 hours
+                <span className="text-sm">Market.CSGO</span>
+                <span className="font-medium">
+                  {(
+                    (stats.totalMarketCSGOBalance / totalLiquidFunds) *
+                    100
+                  ).toFixed(1)}
+                  %
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Lis-Skins</span>
+                <span className="font-medium">
+                  {(
+                    (stats.totalLisSkinBalance / totalLiquidFunds) *
+                    100
+                  ).toFixed(1)}
+                  %
                 </span>
               </div>
             </div>
