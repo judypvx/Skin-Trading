@@ -394,30 +394,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
           </div>
         );
 
-      case "ready_to_trade":
-        return (
-          <div className="flex justify-center">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Badge
-                    variant="default"
-                    className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 whitespace-nowrap flex items-center gap-1"
-                  >
-                    ✅ Ready to Trade/Sell
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    This item is tradeable and ready to be sold on any
-                    marketplace
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        );
-
       default:
         return (
           <div className="flex justify-center">
