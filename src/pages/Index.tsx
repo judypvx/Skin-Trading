@@ -37,10 +37,45 @@ const Index = () => {
   const [selectedTimePeriod, setSelectedTimePeriod] =
     useState<string>("all-time");
 
+  // Filter items by selected time period
+  const getFilteredItemsByTimePeriod = (timePeriod: string) => {
+    if (timePeriod === "all-time") return items;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    let startDate: Date;
+
+    switch (timePeriod) {
+      case "today":
+        startDate = today;
+        break;
+      case "last-7-days":
+        startDate = new Date(today);
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case "this-month":
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      default:
+        return items;
+    }
+
+    return items.filter((item) => {
+      // For sold items, use sell date; for unsold items, use buy date
+      const itemDate =
+        item.status === "sold" && item.sellDate
+          ? new Date(item.sellDate)
+          : new Date(item.buyDate);
+      return itemDate >= startDate;
+    });
+  };
+
   useEffect(() => {
-    const newStats = calculateStats(items);
+    const filteredItems = getFilteredItemsByTimePeriod(selectedTimePeriod);
+    const newStats = calculateStats(filteredItems);
     setStats(newStats);
-  }, [items]);
+  }, [items, selectedTimePeriod]);
 
   const handleUpdateItem = (id: string, updates: Partial<TradingItem>) => {
     setItems((prev) =>
