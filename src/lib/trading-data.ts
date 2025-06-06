@@ -21,13 +21,15 @@ export interface TradingItem {
   buyDate: string;
   market: "Lis-Skins" | "Market.CSGO" | "Steam Market";
   assetId: string;
-  status: "sold" | "unsold" | "locked";
+  status: "sold" | "unsold" | "waiting_unlock" | "trade_ban" | "ready_to_trade";
   sellPrice: number | null;
   sellDate: string | null;
   sellMarket?: "Lis-Skins" | "Market.CSGO" | "Steam Market" | null;
   targetSellMarket?: "Lis-Skins" | "Market.CSGO" | "Steam Market" | null; // Selected marketplace during import
   currentMarketPrice?: number; // Current lowest price on target marketplace
   unlock_at?: string | null; // ISO date string when item becomes tradable
+  trade_ban_until?: string | null; // ISO date string when trade ban expires
+  delivered_to_steam?: boolean; // Whether item has been delivered to Steam inventory
   profit: number;
   profitPercentage: number;
   potentialProfit: number;
