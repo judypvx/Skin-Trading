@@ -44,36 +44,38 @@ export const defaultTradingTableSettings: TradingTableSettings = {
   version: 2, // Incremented version to force reset
 };
 
-// Local storage helpers
+// Local storage helpers - Changed key name to force reset
+const SETTINGS_KEY = "tradingTableSettings_v2"; // New key to force reset
+
 export const saveSettings = (settings: TradingTableSettings) => {
-  localStorage.setItem("tradingTableSettings", JSON.stringify(settings));
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 };
 
 export const loadSettings = (): TradingTableSettings => {
-  const saved = localStorage.getItem("tradingTableSettings");
+  // Clear old settings key
+  localStorage.removeItem("tradingTableSettings");
+
+  const saved = localStorage.getItem(SETTINGS_KEY);
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
+
       // Filter out assetId and itemImage columns if they exist in saved settings
       const filteredColumns = parsed.columns.filter(
         (col: ColumnSettings) => col.id !== "assetId" && col.id !== "itemImage",
       );
 
-      // If we filtered out columns, save the clean settings back to localStorage
-      if (filteredColumns.length !== parsed.columns.length) {
-        const cleanSettings = { ...parsed, columns: filteredColumns };
-        localStorage.setItem(
-          "tradingTableSettings",
-          JSON.stringify(cleanSettings),
-        );
-        return cleanSettings;
-      }
-
-      return { ...parsed, columns: filteredColumns };
+      return { ...parsed, columns: filteredColumns, version: 2 };
     } catch {
       return defaultTradingTableSettings;
     }
   }
+  return defaultTradingTableSettings;
+};
+
+export const resetSettings = (): TradingTableSettings => {
+  localStorage.removeItem(SETTINGS_KEY);
+  localStorage.removeItem("tradingTableSettings"); // Also remove old key
   return defaultTradingTableSettings;
 };
 
