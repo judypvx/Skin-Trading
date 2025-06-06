@@ -40,6 +40,7 @@ import {
   XCircle,
   Copy,
   Settings,
+  Info,
 } from "lucide-react";
 import {
   SteamAccount,
