@@ -625,7 +625,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                           )}
                           {column.id === "buyDate" && (
                             <div className="flex items-center justify-center">
-                              <span className="text-sm font-medium">
+                              <span className="text-sm font-medium whitespace-nowrap">
                                 {formatDate(item.buyDate)}
                               </span>
                             </div>
