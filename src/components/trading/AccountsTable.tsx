@@ -280,37 +280,22 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
             </div>
 
             <div className="flex gap-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Select
-                      value={inventoryValueMarket}
-                      onValueChange={(value) =>
-                        setInventoryValueMarket(
-                          value as "Market.CSGO" | "Steam Market",
-                        )
-                      }
-                    >
-                      <SelectTrigger className="w-[150px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Market.CSGO">Market.CSGO</SelectItem>
-                        <SelectItem value="Steam Market">
-                          Steam Market
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      Select which marketplace to use for calculating inventory
-                      values
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
+              <Select
+                value={inventoryValueMarket}
+                onValueChange={(value) =>
+                  setInventoryValueMarket(
+                    value as "Market.CSGO" | "Steam Market",
+                  )
+                }
+              >
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Market.CSGO">Market.CSGO</SelectItem>
+                  <SelectItem value="Steam Market">Steam Market</SelectItem>
+                </SelectContent>
+              </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[130px]">
                   <Filter className="h-4 w-4 mr-2" />
