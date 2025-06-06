@@ -20,7 +20,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
@@ -94,7 +93,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   const [activeTab, setActiveTab] = useState<"inventory" | "history">(
     "inventory",
   );
-  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const resizeStartX = useRef<number>(0);
   const resizeStartWidth = useRef<number>(0);
@@ -107,48 +107,52 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   // Helper function to check if a date is within range
   const isDateInRange = (
     dateString: string | null,
-    from?: Date,
-    to?: Date,
+    from?: string,
+    to?: string,
   ): boolean => {
     if (!dateString || (!from && !to)) return true;
 
     const date = new Date(dateString);
-    if (from && date < from) return false;
-    if (to && date > to) return false;
+    if (from && date < new Date(from)) return false;
+    if (to && date > new Date(to)) return false;
     return true;
   };
 
   // Quick date preset functions
-  const getDatePreset = (preset: string) => {
+  const applyDatePreset = (preset: string) => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     switch (preset) {
       case "last7days":
-        return {
-          from: new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000),
-          to: today,
-        };
+        const last7 = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
+        setDateFrom(last7.toISOString().split("T")[0]);
+        setDateTo(today.toISOString().split("T")[0]);
+        break;
       case "last30days":
-        return {
-          from: new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000),
-          to: today,
-        };
+        const last30 = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000);
+        setDateFrom(last30.toISOString().split("T")[0]);
+        setDateTo(today.toISOString().split("T")[0]);
+        break;
       case "thisMonth":
-        return {
-          from: new Date(now.getFullYear(), now.getMonth(), 1),
-          to: today,
-        };
+        const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        setDateFrom(thisMonthStart.toISOString().split("T")[0]);
+        setDateTo(today.toISOString().split("T")[0]);
+        break;
       case "lastMonth":
-        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthStart = new Date(
+          now.getFullYear(),
+          now.getMonth() - 1,
+          1,
+        );
         const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-        return {
-          from: lastMonth,
-          to: lastMonthEnd,
-        };
+        setDateFrom(lastMonthStart.toISOString().split("T")[0]);
+        setDateTo(lastMonthEnd.toISOString().split("T")[0]);
+        break;
       default:
-        return {};
+        break;
     }
+    setIsDatePickerOpen(false);
   };
 
   const filteredAndSortedItems = useMemo(() => {
@@ -176,12 +180,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
       // Date range filtering for sell history
       let matchesDateRange = true;
-      if (activeTab === "history" && (dateRange.from || dateRange.to)) {
-        matchesDateRange = isDateInRange(
-          item.sellDate,
-          dateRange.from,
-          dateRange.to,
-        );
+      if (activeTab === "history" && (dateFrom || dateTo)) {
+        matchesDateRange = isDateInRange(item.sellDate, dateFrom, dateTo);
       }
 
       return (
@@ -224,7 +224,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     sortField,
     sortDirection,
     activeTab,
-    dateRange,
+    dateFrom,
+    dateTo,
   ]);
 
   const handleSort = (field: SortField) => {
@@ -295,13 +296,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   };
 
   const clearDateRange = () => {
-    setDateRange({});
-  };
-
-  const applyDatePreset = (preset: string) => {
-    const presetRange = getDatePreset(preset);
-    setDateRange(presetRange);
-    setIsDatePickerOpen(false);
+    setDateFrom("");
+    setDateTo("");
   };
 
   // Column drag and drop handlers
@@ -586,21 +582,21 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   };
 
   const formatDateRange = () => {
-    if (!dateRange.from && !dateRange.to) return "All Time";
+    if (!dateFrom && !dateTo) return "All Time";
 
-    const formatDate = (date: Date) => {
-      return date.toLocaleDateString("en-US", {
+    const formatDate = (dateStr: string) => {
+      return new Date(dateStr).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
       });
     };
 
-    if (dateRange.from && dateRange.to) {
-      return `${formatDate(dateRange.from)} - ${formatDate(dateRange.to)}`;
-    } else if (dateRange.from) {
-      return `From ${formatDate(dateRange.from)}`;
-    } else if (dateRange.to) {
-      return `Until ${formatDate(dateRange.to)}`;
+    if (dateFrom && dateTo) {
+      return `${formatDate(dateFrom)} - ${formatDate(dateTo)}`;
+    } else if (dateFrom) {
+      return `From ${formatDate(dateFrom)}`;
+    } else if (dateTo) {
+      return `Until ${formatDate(dateTo)}`;
     }
 
     return "All Time";
@@ -1097,12 +1093,12 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                       {formatDateRange()}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <div className="p-3 border-b">
+                  <PopoverContent className="w-80 p-0" align="start">
+                    <div className="p-4 border-b">
                       <h4 className="font-medium text-sm mb-3">
                         Filter by sell date
                       </h4>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-2 mb-4">
                         <Button
                           variant="outline"
                           size="sm"
@@ -1136,23 +1132,30 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                           Last Month
                         </Button>
                       </div>
+                      <div className="space-y-2">
+                        <div>
+                          <label className="text-xs font-medium">
+                            From Date
+                          </label>
+                          <Input
+                            type="date"
+                            value={dateFrom}
+                            onChange={(e) => setDateFrom(e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium">To Date</label>
+                          <Input
+                            type="date"
+                            value={dateTo}
+                            onChange={(e) => setDateTo(e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <Calendar
-                      mode="range"
-                      selected={{
-                        from: dateRange.from,
-                        to: dateRange.to,
-                      }}
-                      onSelect={(range) => {
-                        setDateRange({
-                          from: range?.from,
-                          to: range?.to,
-                        });
-                      }}
-                      numberOfMonths={2}
-                      className="rounded-md"
-                    />
-                    <div className="p-3 border-t flex gap-2">
+                    <div className="p-3 flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
@@ -1196,7 +1199,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                       Clear account filters
                     </Button>
                   )}
-                  {(dateRange.from || dateRange.to) && (
+                  {(dateFrom || dateTo) && (
                     <Button variant="link" onClick={clearDateRange}>
                       Clear date range
                     </Button>
