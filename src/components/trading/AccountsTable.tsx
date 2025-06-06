@@ -433,12 +433,7 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
                             {account.nickname.slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <div className="font-medium">{account.nickname}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {formatDate(account.lastActivity)}
-                          </div>
-                        </div>
+                        <div className="font-medium">{account.nickname}</div>
                       </div>
                     </TableCell>
                     <TableCell>
