@@ -340,7 +340,7 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50px]">
+                  <TableHead className="w-[50px] text-center">
                     <Checkbox
                       checked={
                         selectedAccounts.length ===
@@ -351,51 +351,51 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
                     />
                   </TableHead>
                   <TableHead
-                    className="cursor-pointer hover:bg-muted/50"
+                    className="cursor-pointer hover:bg-muted/50 text-center"
                     onClick={() => handleSort("nickname")}
                   >
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center justify-center gap-1">
                       Account
                       <ArrowUpDown className="h-3 w-3" />
                     </div>
                   </TableHead>
-                  <TableHead>Proxy</TableHead>
-                  <TableHead>2FA Code</TableHead>
+                  <TableHead className="text-center">Proxy</TableHead>
+                  <TableHead className="text-center">2FA Code</TableHead>
                   <TableHead
-                    className="cursor-pointer hover:bg-muted/50"
+                    className="cursor-pointer hover:bg-muted/50 text-center"
                     onClick={() => handleSort("tradeConfirmations")}
                   >
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center justify-center gap-1">
                       Trade Confirms
                       <ArrowUpDown className="h-3 w-3" />
                     </div>
                   </TableHead>
                   <TableHead
-                    className="cursor-pointer hover:bg-muted/50"
+                    className="cursor-pointer hover:bg-muted/50 text-center"
                     onClick={() => handleSort("steamBalance")}
                   >
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center justify-center gap-1">
                       Steam Balance
                       <ArrowUpDown className="h-3 w-3" />
                     </div>
                   </TableHead>
                   <TableHead
-                    className="cursor-pointer hover:bg-muted/50"
+                    className="cursor-pointer hover:bg-muted/50 text-center"
                     onClick={() => handleSort("marketCSGOBalance")}
                   >
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center justify-center gap-1">
                       Market.CSGO Balance
                       <ArrowUpDown className="h-3 w-3" />
                     </div>
                   </TableHead>
                   <TableHead
-                    className="cursor-pointer hover:bg-muted/50 min-w-[100px]"
+                    className="cursor-pointer hover:bg-muted/50 text-center min-w-[120px]"
                     onClick={() => handleSort("lisSkinBalance")}
                   >
-                    <div className="flex items-center gap-1">
-                      <div className="text-center">
-                        <div>Lis-Skins</div>
-                        <div>Balance</div>
+                    <div className="flex items-center justify-center gap-1">
+                      <div className="text-center leading-tight">
+                        <div className="font-medium">Lis-Skins</div>
+                        <div className="font-medium">Balance</div>
                       </div>
                       <ArrowUpDown className="h-3 w-3" />
                     </div>
