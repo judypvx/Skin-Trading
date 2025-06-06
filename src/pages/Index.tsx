@@ -99,7 +99,7 @@ const Index = () => {
 
     const blob = new Blob(
       [
-        `Item Name,Buy Price,Buy Date,Market,Asset ID,Status,Sell Price,Sell Date,Profit,Profit %\n${csvContent}`,
+        `Item Name,Buy Price,Buy Date,Market,Status,Sell Price,Sell Date,Profit,Profit %\n${csvContent}`,
       ],
       { type: "text/csv" },
     );
