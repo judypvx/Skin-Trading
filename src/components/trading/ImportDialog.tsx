@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,11 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Upload, Download, Key, FileText, Loader2 } from "lucide-react";
+import { Download, Key, Loader2, User } from "lucide-react";
 import { toast } from "sonner";
-import { getImportFunction, validateApiKey, uploadCSV } from "@/lib/api";
+import { getImportFunction, validateApiKey } from "@/lib/api";
+import { mockSteamAccounts, SteamAccount } from "@/lib/account-data";
 
 interface ImportDialogProps {
   onImportSuccess: () => void;
@@ -30,37 +30,74 @@ interface ImportDialogProps {
 const ImportDialog = ({ onImportSuccess }: ImportDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [apiKey, setApiKey] = useState("");
-  const [selectedPlatform, setSelectedPlatform] = useState("");
+  const [selectedAccount, setSelectedAccount] = useState("");
+  const [selectedMarketplace, setSelectedMarketplace] = useState("");
+  const [autoFilledApiKey, setAutoFilledApiKey] = useState("");
 
-  const platforms = [
+  const marketplaces = [
     { value: "Lis-Skins", label: "Lis-Skins", available: true },
     { value: "Market.CSGO", label: "Market.CSGO", available: true },
     { value: "Steam Market", label: "Steam Market", available: false },
   ];
 
+  // Filter active accounts only
+  const availableAccounts = mockSteamAccounts.filter(
+    (account) => account.isActive && account.status === "OK",
+  );
+
+  // Auto-fill API key when account and marketplace are selected
+  useEffect(() => {
+    if (selectedAccount && selectedMarketplace) {
+      const account = mockSteamAccounts.find(
+        (acc) => acc.id === selectedAccount,
+      );
+      if (account) {
+        let apiKey = "";
+        switch (selectedMarketplace) {
+          case "Lis-Skins":
+            apiKey = account.lisSkinApiKey || "";
+            break;
+          case "Market.CSGO":
+            apiKey = account.marketCSGOApiKey || "";
+            break;
+          case "Steam Market":
+            apiKey = account.steamApiKey || "";
+            break;
+        }
+        setAutoFilledApiKey(apiKey);
+      }
+    } else {
+      setAutoFilledApiKey("");
+    }
+  }, [selectedAccount, selectedMarketplace]);
+
   const handleApiImport = async () => {
-    if (!selectedPlatform || !apiKey) {
-      toast.error("Please select a platform and enter your API key");
+    if (!selectedAccount || !selectedMarketplace || !autoFilledApiKey) {
+      toast.error("Please select an account and marketplace");
       return;
     }
 
-    if (!validateApiKey(apiKey, selectedPlatform)) {
-      toast.error("Invalid API key format");
+    if (!validateApiKey(autoFilledApiKey, selectedMarketplace)) {
+      toast.error("Invalid API key for selected marketplace");
       return;
     }
 
     setLoading(true);
     try {
-      const importFunction = getImportFunction(selectedPlatform);
-      const result = await importFunction(apiKey);
+      const importFunction = getImportFunction(selectedMarketplace);
+      const result = await importFunction(
+        autoFilledApiKey,
+        selectedAccount,
+        selectedMarketplace,
+      );
 
       if (result.success) {
-        toast.success(result.message);
+        toast.success(
+          `Successfully imported ${result.itemCount || 0} items from ${selectedMarketplace}`,
+        );
         onImportSuccess();
         setOpen(false);
-        setApiKey("");
-        setSelectedPlatform("");
+        resetForm();
       } else {
         toast.error(result.message);
       }
@@ -71,158 +108,202 @@ const ImportDialog = ({ onImportSuccess }: ImportDialogProps) => {
     }
   };
 
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const resetForm = () => {
+    setSelectedAccount("");
+    setSelectedMarketplace("");
+    setAutoFilledApiKey("");
+  };
 
-    if (!file.name.endsWith(".csv")) {
-      toast.error("Please upload a CSV file");
-      return;
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      resetForm();
     }
+  };
 
-    setLoading(true);
-    try {
-      const result = await uploadCSV(file);
-      if (result.success) {
-        toast.success(result.message);
-        onImportSuccess();
-        setOpen(false);
-      } else {
-        toast.error(result.message);
-      }
-    } catch (error) {
-      toast.error("File upload failed. Please try again.");
-    } finally {
-      setLoading(false);
+  const selectedAccountData = mockSteamAccounts.find(
+    (acc) => acc.id === selectedAccount,
+  );
+
+  const isMarketplaceAvailable = (marketplace: string) => {
+    if (!selectedAccountData) return false;
+
+    switch (marketplace) {
+      case "Lis-Skins":
+        return !!selectedAccountData.lisSkinApiKey;
+      case "Market.CSGO":
+        return !!selectedAccountData.marketCSGOApiKey;
+      case "Steam Market":
+        return !!selectedAccountData.steamApiKey;
+      default:
+        return false;
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Download className="h-4 w-4" />
           Update Inventory
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Download className="h-5 w-5" />
             Update Inventory
           </DialogTitle>
           <DialogDescription>
-            Update your trading inventory from various marketplaces or upload a
-            CSV file.
+            Import your trading inventory from a marketplace using API
+            integration.
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="api" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="api" className="gap-2">
-              <Key className="h-4 w-4" />
-              API Import
-            </TabsTrigger>
-            <TabsTrigger value="csv" className="gap-2">
-              <FileText className="h-4 w-4" />
-              CSV Upload
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="api" className="space-y-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="platform">Select Platform</Label>
-                <Select
-                  value={selectedPlatform}
-                  onValueChange={setSelectedPlatform}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a marketplace" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {platforms.map((platform) => (
-                      <SelectItem
-                        key={platform.value}
-                        value={platform.value}
-                        disabled={!platform.available}
-                      >
-                        {platform.label}
-                        {!platform.available && " (Coming Soon)"}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="apiKey">API Key</Label>
-                <Input
-                  id="apiKey"
-                  type="password"
-                  placeholder="Enter your API key"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                />
-                <p className="text-sm text-muted-foreground">
-                  Your API key is used to fetch trading data from the selected
-                  platform.
-                </p>
-              </div>
-
-              <Button
-                onClick={handleApiImport}
-                disabled={loading || !selectedPlatform || !apiKey}
-                className="w-full gap-2"
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="account">Select Account</Label>
+              <Select
+                value={selectedAccount}
+                onValueChange={setSelectedAccount}
               >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4" />
-                )}
-                {loading ? "Importing..." : "Import from API"}
-              </Button>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a Steam account">
+                    {selectedAccountData && (
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        {selectedAccountData.nickname}
+                      </div>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {availableAccounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span>{account.nickname}</span>
+                        <span className="text-xs text-muted-foreground">
+                          (Level {account.steamLevel})
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedAccountData && (
+                <p className="text-xs text-muted-foreground">
+                  Steam Balance: ${selectedAccountData.steamBalance.toFixed(2)}{" "}
+                  | Inventory Value: $
+                  {selectedAccountData.inventoryValue.toFixed(2)}
+                </p>
+              )}
             </div>
-          </TabsContent>
 
-          <TabsContent value="csv" className="space-y-4">
-            <div className="space-y-4">
-              <div className="text-center border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
-                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <Label htmlFor="csv-upload" className="cursor-pointer">
-                  <span className="text-lg font-medium">Upload CSV File</span>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Click to browse or drag and drop your CSV file here
+            <div className="space-y-2">
+              <Label htmlFor="marketplace">Target Selling Marketplace</Label>
+              <Select
+                value={selectedMarketplace}
+                onValueChange={setSelectedMarketplace}
+                disabled={!selectedAccount}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose target marketplace" />
+                </SelectTrigger>
+                <SelectContent>
+                  {marketplaces.map((marketplace) => {
+                    const hasApiKey = isMarketplaceAvailable(marketplace.value);
+                    const isDisabled = !marketplace.available || !hasApiKey;
+
+                    return (
+                      <SelectItem
+                        key={marketplace.value}
+                        value={marketplace.value}
+                        disabled={isDisabled}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span>{marketplace.label}</span>
+                          {!marketplace.available && (
+                            <span className="text-xs text-muted-foreground ml-2">
+                              (Coming Soon)
+                            </span>
+                          )}
+                          {marketplace.available &&
+                            !hasApiKey &&
+                            selectedAccount && (
+                              <span className="text-xs text-red-500 ml-2">
+                                (No API Key)
+                              </span>
+                            )}
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Items will be marked for sale on this marketplace and current
+                prices will be tracked.
+              </p>
+            </div>
+
+            {selectedAccount && selectedMarketplace && (
+              <>
+                <Separator />
+                <div className="space-y-2">
+                  <Label htmlFor="apiKey">API Key (Auto-filled)</Label>
+                  <div className="relative">
+                    <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="apiKey"
+                      type="password"
+                      value={autoFilledApiKey}
+                      readOnly
+                      className="pl-10 bg-muted"
+                      placeholder="API key will be auto-filled"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    API key automatically selected from account settings for{" "}
+                    {selectedMarketplace}.
                   </p>
-                </Label>
-                <Input
-                  id="csv-upload"
-                  type="file"
-                  accept=".csv"
-                  className="hidden"
-                  onChange={handleFileUpload}
-                  disabled={loading}
-                />
-              </div>
+                </div>
+              </>
+            )}
+          </div>
 
-              <Separator />
+          <Button
+            onClick={handleApiImport}
+            disabled={
+              loading ||
+              !selectedAccount ||
+              !selectedMarketplace ||
+              !autoFilledApiKey ||
+              !isMarketplaceAvailable(selectedMarketplace)
+            }
+            className="w-full gap-2"
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {loading
+              ? "Importing Inventory..."
+              : `Import from ${selectedMarketplace || "Marketplace"}`}
+          </Button>
 
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">
-                  CSV Format Requirements:
-                </h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Item Name, Buy Price, Buy Date, Market, Asset ID</li>
-                  <li>• Optional: Sell Price, Sell Date, Status</li>
-                  <li>• Dates in YYYY-MM-DD format</li>
-                  <li>• Prices in USD (numbers only)</li>
-                </ul>
-              </div>
+          {selectedAccount && selectedMarketplace && (
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
+                This will import inventory items from{" "}
+                <strong>{selectedAccountData?.nickname}</strong> and mark them
+                for sale on <strong>{selectedMarketplace}</strong>.
+              </p>
             </div>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
