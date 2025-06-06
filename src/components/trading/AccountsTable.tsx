@@ -405,20 +405,7 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
                     onClick={() => handleSort("inventoryValue")}
                   >
                     <div className="flex items-center gap-1">
-                      <span>Inventory Value ({inventoryValueMarket})</span>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              Estimated market value of this account's inventory
-                              on {inventoryValueMarket}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      Inventory Value ({inventoryValueMarket})
                       <ArrowUpDown className="h-3 w-3" />
                     </div>
                   </TableHead>
