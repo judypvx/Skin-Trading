@@ -143,7 +143,7 @@ const Index = () => {
       <NavigationTabs />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="max-w-[1600px] mx-auto px-4 py-6">
         {/* Welcome Section */}
         <div className="mb-6">
           <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-primary/20">
