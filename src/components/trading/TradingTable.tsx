@@ -683,103 +683,213 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4 mt-4">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Search sell history..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Search sell history..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
 
-              <div className="flex flex-wrap gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="gap-2">
-                      <Users className="h-4 w-4" />
-                      Accounts{" "}
-                      {accountFilters.length > 0 &&
-                        `(${accountFilters.length})`}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56">
-                    <DropdownMenuLabel>Select Accounts</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={selectAllAccounts}
-                      className="text-blue-600"
-                    >
-                      <Check className="h-3 w-3 mr-2" />
-                      Select All
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    {nonAllAccounts.map((account) => (
+                <div className="flex flex-wrap gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="gap-2">
+                        <Users className="h-4 w-4" />
+                        Accounts{" "}
+                        {accountFilters.length > 0 &&
+                          `(${accountFilters.length})`}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuLabel>Select Accounts</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        key={account.id}
-                        className="flex items-center gap-2 cursor-pointer"
-                        onSelect={(e) => e.preventDefault()}
+                        onClick={selectAllAccounts}
+                        className="text-blue-600"
                       >
-                        <Checkbox
-                          checked={accountFilters.includes(account.id)}
-                          onCheckedChange={(checked) =>
-                            handleAccountFilterChange(
-                              account.id,
-                              checked as boolean,
-                            )
-                          }
-                        />
-                        <span className="flex-1">{account.nickname}</span>
+                        <Check className="h-3 w-3 mr-2" />
+                        Select All
                       </DropdownMenuItem>
-                    ))}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={clearAllAccounts}
-                      className="text-red-600"
-                    >
-                      <X className="h-3 w-3 mr-2" />
-                      Clear All
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                      <DropdownMenuSeparator />
+                      {nonAllAccounts.map((account) => (
+                        <DropdownMenuItem
+                          key={account.id}
+                          className="flex items-center gap-2 cursor-pointer"
+                          onSelect={(e) => e.preventDefault()}
+                        >
+                          <Checkbox
+                            checked={accountFilters.includes(account.id)}
+                            onCheckedChange={(checked) =>
+                              handleAccountFilterChange(
+                                account.id,
+                                checked as boolean,
+                              )
+                            }
+                          />
+                          <span className="flex-1">{account.nickname}</span>
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={clearAllAccounts}
+                        className="text-red-600"
+                      >
+                        <X className="h-3 w-3 mr-2" />
+                        Clear All
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="gap-2">
-                      <Filter className="h-4 w-4" />
-                      Markets{" "}
-                      {marketFilters.length > 0 && `(${marketFilters.length})`}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56">
-                    <DropdownMenuLabel>Select Markets</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {markets.map((market) => (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="gap-2">
+                        <Filter className="h-4 w-4" />
+                        Markets{" "}
+                        {marketFilters.length > 0 &&
+                          `(${marketFilters.length})`}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuLabel>Select Markets</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {markets.map((market) => (
+                        <DropdownMenuItem
+                          key={market}
+                          className="flex items-center gap-2 cursor-pointer"
+                          onSelect={(e) => e.preventDefault()}
+                        >
+                          <Checkbox
+                            checked={marketFilters.includes(market)}
+                            onCheckedChange={(checked) =>
+                              handleMarketFilterChange(
+                                market,
+                                checked as boolean,
+                              )
+                            }
+                          />
+                          <span className="flex-1">{market}</span>
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        key={market}
-                        className="flex items-center gap-2 cursor-pointer"
-                        onSelect={(e) => e.preventDefault()}
+                        onClick={clearAllMarkets}
+                        className="text-red-600"
                       >
-                        <Checkbox
-                          checked={marketFilters.includes(market)}
-                          onCheckedChange={(checked) =>
-                            handleMarketFilterChange(market, checked as boolean)
-                          }
-                        />
-                        <span className="flex-1">{market}</span>
+                        <X className="h-3 w-3 mr-2" />
+                        Clear All
                       </DropdownMenuItem>
-                    ))}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={clearAllMarkets}
-                      className="text-red-600"
-                    >
-                      <X className="h-3 w-3 mr-2" />
-                      Clear All
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="gap-2">
+                        <CalendarDays className="h-4 w-4" />
+                        Date Range{" "}
+                        {dateRange.preset !== "all-time" &&
+                          `(${dateRange.preset.replace("-", " ")})`}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-80 p-4">
+                      <DropdownMenuLabel>Select Date Range</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+
+                      {/* Preset Options */}
+                      <div className="space-y-2 mb-4">
+                        <div className="text-sm font-medium text-muted-foreground">
+                          Quick Select:
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {[
+                            { value: "today", label: "Today" },
+                            { value: "yesterday", label: "Yesterday" },
+                            { value: "last-7-days", label: "Last 7 Days" },
+                            { value: "last-30-days", label: "Last 30 Days" },
+                            { value: "this-month", label: "This Month" },
+                            { value: "last-month", label: "Last Month" },
+                            { value: "all-time", label: "All Time" },
+                          ].map((preset) => (
+                            <Button
+                              key={preset.value}
+                              variant={
+                                dateRange.preset === preset.value
+                                  ? "default"
+                                  : "outline"
+                              }
+                              size="sm"
+                              onClick={() =>
+                                handleDatePresetChange(preset.value)
+                              }
+                              className="justify-start text-xs h-8"
+                            >
+                              {preset.label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <DropdownMenuSeparator />
+
+                      {/* Custom Date Inputs */}
+                      <div className="space-y-3 mt-4">
+                        <div className="text-sm font-medium text-muted-foreground">
+                          Custom Range:
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-xs text-muted-foreground">
+                              From
+                            </label>
+                            <Input
+                              type="date"
+                              value={dateRange.startDate || ""}
+                              onChange={(e) =>
+                                handleCustomDateChange(
+                                  "startDate",
+                                  e.target.value,
+                                )
+                              }
+                              className="text-xs h-8"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground">
+                              To
+                            </label>
+                            <Input
+                              type="date"
+                              value={dateRange.endDate || ""}
+                              onChange={(e) =>
+                                handleCustomDateChange(
+                                  "endDate",
+                                  e.target.value,
+                                )
+                              }
+                              className="text-xs h-8"
+                            />
+                          </div>
+                        </div>
+
+                        {dateRange.preset !== "all-time" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={clearDateFilter}
+                            className="w-full text-xs h-8 text-red-600 hover:text-red-700"
+                          >
+                            <X className="h-3 w-3 mr-1" />
+                            Clear Date Filter
+                          </Button>
+                        )}
+                      </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             </div>
 
