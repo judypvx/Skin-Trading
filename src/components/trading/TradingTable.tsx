@@ -640,7 +640,33 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                   </div>
                                 </div>
                               ) : (
-                                <span className="text-muted-foreground">—</span>
+                                <div>
+                                  {item.targetSellMarket &&
+                                  item.currentMarketPrice ? (
+                                    <div>
+                                      <div className="flex items-center gap-1 mb-1">
+                                        <Badge
+                                          variant="outline"
+                                          className="text-xs"
+                                        >
+                                          {item.targetSellMarket}
+                                        </Badge>
+                                      </div>
+                                      <div className="font-medium text-blue-600 dark:text-blue-400">
+                                        {formatCurrency(
+                                          item.currentMarketPrice,
+                                        )}
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">
+                                        Current lowest
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted-foreground">
+                                      —
+                                    </span>
+                                  )}
+                                </div>
                               )}
                             </div>
                           )}
