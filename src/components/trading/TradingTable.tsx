@@ -588,9 +588,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
       item.status === "trade_ban",
   ).length;
   const historyCount = items.filter((item) => item.status === "sold").length;
-    (item) => item.status === "ready_to_trade",
-  ).length;
-  const historyCount = items.filter((item) => item.status === "sold").length;
 
   const visibleColumns = settings.columns
     .filter((col) => col.visible)
