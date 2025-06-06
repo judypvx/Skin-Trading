@@ -1519,11 +1519,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                               {item.market}
                             </Badge>
                           )}
-                          {column.id === "assetId" && (
-                            <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
-                              {item.assetId}
-                            </code>
-                          )}
+
                           {column.id === "status" && getStatusBadge(item)}
                           {column.id === "sellInfo" && getSellInfoDisplay(item)}
                           {column.id === "profit" && getProfitDisplay(item)}
