@@ -359,7 +359,7 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
                       <ArrowUpDown className="h-3 w-3" />
                     </div>
                   </TableHead>
-                  <TableHead className="text-center w-[120px]">Proxy</TableHead>
+                  <TableHead className="text-center w-[90px]">Proxy</TableHead>
                   <TableHead className="text-center">2FA Code</TableHead>
                   <TableHead
                     className="cursor-pointer hover:bg-muted/50 text-center"
