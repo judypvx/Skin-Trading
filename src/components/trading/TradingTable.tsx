@@ -444,8 +444,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
               </Badge>
             </div>
             <div className="font-medium">{formatCurrency(item.sellPrice!)}</div>
-            <div className="text-xs text-muted-foreground">
-              Sold on {formatDate(item.sellDate!)}
+            <div className="text-xs text-muted-foreground whitespace-nowrap">
+              {formatDate(item.sellDate!)}
             </div>
           </div>
         </div>
