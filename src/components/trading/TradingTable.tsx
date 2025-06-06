@@ -884,10 +884,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent>
-                            <DropdownMenuItem>
-                              <Copy className="h-3 w-3 mr-2" />
-                              Copy Asset ID
-                            </DropdownMenuItem>
                             <DropdownMenuItem>View Details</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
