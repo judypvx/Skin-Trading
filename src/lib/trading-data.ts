@@ -21,7 +21,7 @@ export interface TradingItem {
   buyDate: string;
   market: "Lis-Skins" | "Market.CSGO" | "Steam Market";
   assetId: string;
-  status: "sold" | "unsold" | "waiting_unlock" | "trade_ban";
+  status: "sold" | "unsold" | "waiting_unlock" | "trade_ban" | "ready_to_trade";
   sellPrice: number | null;
   sellDate: string | null;
   sellMarket?: "Lis-Skins" | "Market.CSGO" | "Steam Market" | null;
