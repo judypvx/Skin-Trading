@@ -433,6 +433,52 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
         );
     }
   };
+  const getSellInfoDisplay = (item: TradingItem) => {
+    if (item.status === "sold") {
+      return (
+        <div className="flex items-center justify-center">
+          <div className="text-center space-y-1">
+            <div className="flex justify-center">
+              <Badge variant="outline" className="text-xs whitespace-nowrap">
+                {item.sellMarket}
+              </Badge>
+            </div>
+            <div className="font-medium">{formatCurrency(item.sellPrice!)}</div>
+            <div className="text-xs text-muted-foreground">
+              Sold on {formatDate(item.sellDate!)}
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      if (item.targetSellMarket && item.currentMarketPrice) {
+        return (
+          <div className="flex items-center justify-center">
+            <div className="text-center space-y-1">
+              <div className="flex justify-center">
+                <Badge variant="outline" className="text-xs whitespace-nowrap">
+                  {item.targetSellMarket}
+                </Badge>
+              </div>
+              <div className="font-medium text-blue-600 dark:text-blue-400">
+                {formatCurrency(item.currentMarketPrice)}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Current lowest
+              </div>
+            </div>
+          </div>
+        );
+      } else {
+        return (
+          <div className="flex items-center justify-center">
+            <span className="text-muted-foreground">—</span>
+          </div>
+        );
+      }
+    }
+  };
+
   const getProfitDisplay = (item: TradingItem) => {
     if (item.status === "sold") {
       const isPositive = item.profit >= 0;
