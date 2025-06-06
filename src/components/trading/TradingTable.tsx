@@ -697,8 +697,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                               {item.assetId}
                             </code>
                           )}
-                          {column.id === "status" &&
-                            getStatusBadge(item.status)}
+                          {column.id === "status" && getStatusBadge(item)}
                           {column.id === "sellInfo" && (
                             <div className="flex items-center justify-center">
                               {item.status === "sold" ? (
