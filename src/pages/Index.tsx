@@ -221,6 +221,11 @@ const Index = () => {
         {/* Stats Panel */}
         <StatsPanel stats={stats} />
 
+        {/* Portfolio Chart */}
+        <div className="mt-6">
+          <PortfolioChart items={items} timePeriod={selectedTimePeriod} />
+        </div>
+
         <Separator className="my-6" />
 
         {/* Action Bar */}
