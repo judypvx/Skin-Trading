@@ -12,12 +12,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from "react-beautiful-dnd";
-import { GripVertical, Eye, EyeOff, RotateCcw, Save, X } from "lucide-react";
+  ChevronUp,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  RotateCcw,
+  Save,
+  X,
+} from "lucide-react";
 import {
   TradingTableSettings,
   ColumnSettings,
@@ -59,15 +61,29 @@ const TableSettingsModal = ({
     }));
   };
 
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
+  const moveColumn = (columnId: string, direction: "up" | "down") => {
+    const columns = [...localSettings.columns].sort(
+      (a, b) => a.order - b.order,
+    );
+    const currentIndex = columns.findIndex((col) => col.id === columnId);
 
-    const reorderedColumns = Array.from(localSettings.columns);
-    const [reorderedItem] = reorderedColumns.splice(result.source.index, 1);
-    reorderedColumns.splice(result.destination.index, 0, reorderedItem);
+    if (
+      (direction === "up" && currentIndex === 0) ||
+      (direction === "down" && currentIndex === columns.length - 1)
+    ) {
+      return; // Can't move further
+    }
+
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+    // Swap the columns
+    [columns[currentIndex], columns[newIndex]] = [
+      columns[newIndex],
+      columns[currentIndex],
+    ];
 
     // Update order values
-    const updatedColumns = reorderedColumns.map((col, index) => ({
+    const updatedColumns = columns.map((col, index) => ({
       ...col,
       order: index + 1,
     }));
@@ -93,6 +109,8 @@ const TableSettingsModal = ({
     setLocalSettings(settings);
     onOpenChange(false);
   };
+
+  const sortedColumns = localSettings.columns.sort((a, b) => a.order - b.order);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -155,101 +173,82 @@ const TableSettingsModal = ({
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">Column Management</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Drag to reorder, toggle visibility, and adjust column widths
+                Use arrows to reorder, toggle visibility, and adjust column
+                widths
               </p>
             </CardHeader>
             <CardContent>
-              <DragDropContext onDragEnd={handleDragEnd}>
-                <Droppable droppableId="columns">
-                  {(provided) => (
-                    <div
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                      className="space-y-2"
-                    >
-                      {localSettings.columns
-                        .sort((a, b) => a.order - b.order)
-                        .map((column, index) => (
-                          <Draggable
-                            key={column.id}
-                            draggableId={column.id}
-                            index={index}
-                          >
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                className={`border rounded-lg p-4 bg-background ${
-                                  snapshot.isDragging ? "shadow-lg" : ""
-                                }`}
-                              >
-                                <div className="flex items-center gap-4">
-                                  <div
-                                    {...provided.dragHandleProps}
-                                    className="text-muted-foreground hover:text-foreground cursor-grab"
-                                  >
-                                    <GripVertical className="h-4 w-4" />
-                                  </div>
+              <div className="space-y-2">
+                {sortedColumns.map((column, index) => (
+                  <div
+                    key={column.id}
+                    className="border rounded-lg p-4 bg-background"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex flex-col gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => moveColumn(column.id, "up")}
+                          disabled={index === 0}
+                        >
+                          <ChevronUp className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => moveColumn(column.id, "down")}
+                          disabled={index === sortedColumns.length - 1}
+                        >
+                          <ChevronDown className="h-3 w-3" />
+                        </Button>
+                      </div>
 
-                                  <div className="flex items-center justify-between flex-1">
-                                    <div className="flex items-center gap-3">
-                                      <Switch
-                                        checked={column.visible}
-                                        onCheckedChange={(checked) =>
-                                          handleColumnVisibilityChange(
-                                            column.id,
-                                            checked,
-                                          )
-                                        }
-                                      />
-                                      <div className="flex items-center gap-2">
-                                        {column.visible ? (
-                                          <Eye className="h-4 w-4 text-green-600" />
-                                        ) : (
-                                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                                        )}
-                                        <span className="font-medium">
-                                          {column.label}
-                                        </span>
-                                      </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-3">
-                                      <div className="flex items-center gap-2">
-                                        <Label className="text-xs">
-                                          Width:
-                                        </Label>
-                                        <div className="w-24">
-                                          <Slider
-                                            value={[column.width || 120]}
-                                            onValueChange={([value]) =>
-                                              handleColumnWidthChange(
-                                                column.id,
-                                                value,
-                                              )
-                                            }
-                                            max={400}
-                                            min={80}
-                                            step={10}
-                                            disabled={!column.visible}
-                                          />
-                                        </div>
-                                        <span className="text-xs text-muted-foreground w-8">
-                                          {column.width}px
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
+                      <div className="flex items-center justify-between flex-1">
+                        <div className="flex items-center gap-3">
+                          <Switch
+                            checked={column.visible}
+                            onCheckedChange={(checked) =>
+                              handleColumnVisibilityChange(column.id, checked)
+                            }
+                          />
+                          <div className="flex items-center gap-2">
+                            {column.visible ? (
+                              <Eye className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
                             )}
-                          </Draggable>
-                        ))}
-                      {provided.placeholder}
+                            <span className="font-medium">{column.label}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            <Label className="text-xs">Width:</Label>
+                            <div className="w-24">
+                              <Slider
+                                value={[column.width || 120]}
+                                onValueChange={([value]) =>
+                                  handleColumnWidthChange(column.id, value)
+                                }
+                                max={400}
+                                min={80}
+                                step={10}
+                                disabled={!column.visible}
+                              />
+                            </div>
+                            <span className="text-xs text-muted-foreground w-8">
+                              {column.width}px
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                </Droppable>
-              </DragDropContext>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
