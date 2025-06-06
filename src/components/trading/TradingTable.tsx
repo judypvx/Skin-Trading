@@ -639,7 +639,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                       <div className="flex items-center gap-1 mb-1">
                                         <Badge
                                           variant="outline"
-                                          className="text-xs"
+                                          className="text-xs whitespace-nowrap"
                                         >
                                           {item.targetSellMarket}
                                         </Badge>
