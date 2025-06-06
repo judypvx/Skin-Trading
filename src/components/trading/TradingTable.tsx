@@ -625,22 +625,22 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                           {column.id === "status" &&
                             getStatusBadge(item.status)}
                           {column.id === "sellInfo" && (
-                            <div>
+                            <div className="flex items-center justify-center">
                               {item.status === "sold" ? (
-                                <div>
+                                <div className="text-center">
                                   <div className="font-medium">
                                     {formatCurrency(item.sellPrice!)}
                                   </div>
-                                  <div className="text-xs text-muted-foreground">
+                                  <div className="text-xs text-muted-foreground mt-1">
                                     {formatDate(item.sellDate!)}
                                   </div>
                                 </div>
                               ) : (
-                                <div>
+                                <div className="text-center">
                                   {item.targetSellMarket &&
                                   item.currentMarketPrice ? (
-                                    <div>
-                                      <div className="flex items-center gap-1 mb-1">
+                                    <div className="space-y-1">
+                                      <div className="flex justify-center">
                                         <Badge
                                           variant="outline"
                                           className="text-xs whitespace-nowrap"
