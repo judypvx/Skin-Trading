@@ -595,19 +595,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                               <div className="truncate font-medium">
                                 {item.itemName}
                               </div>
-                              {item.tags.length > 0 && (
-                                <div className="flex gap-1 mt-1">
-                                  {item.tags.slice(0, 2).map((tag) => (
-                                    <Badge
-                                      key={tag}
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {tag}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              )}
                             </div>
                           )}
                           {column.id === "buyPrice" && (
