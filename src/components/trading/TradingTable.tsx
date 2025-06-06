@@ -652,7 +652,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                   <div className="font-medium">
                                     {formatCurrency(item.sellPrice!)}
                                   </div>
-                                  <div className="text-xs text-muted-foreground mt-1">
+                                  <div className="text-xs text-muted-foreground whitespace-nowrap">
                                     {formatDate(item.sellDate!)}
                                   </div>
                                 </div>
