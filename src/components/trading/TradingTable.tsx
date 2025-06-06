@@ -308,53 +308,127 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   };
 
   const getStatusBadge = (item: TradingItem) => {
-    if (item.status === "sold") {
-      return (
-        <Badge
-          variant="default"
-          className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 whitespace-nowrap"
-        >
-          Sold
-        </Badge>
-      );
-    } else if (item.status === "locked") {
-      return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <Badge
-                variant="secondary"
-                className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 whitespace-nowrap flex items-center gap-1"
-              >
-                🔒 Waiting Unlock
-              </Badge>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>
-                This item is currently trade-locked and will become tradable
-                soon
-              </p>
-              {item.unlock_at && (
-                <p className="text-xs text-muted-foreground">
-                  Unlocks: {new Date(item.unlock_at).toLocaleDateString()}
-                </p>
-              )}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
-    } else {
-      return (
-        <Badge
-          variant="secondary"
-          className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 whitespace-nowrap"
-        >
-          In Inventory
-        </Badge>
-      );
+    const getDaysLeft = (dateString: string) => {
+      const targetDate = new Date(dateString);
+      const now = new Date();
+      const diffTime = targetDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return Math.max(0, diffDays);
+    };
+
+    switch (item.status) {
+      case "sold":
+        return (
+          <div className="flex justify-center">
+            <Badge
+              variant="default"
+              className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 whitespace-nowrap"
+            >
+              Sold
+            </Badge>
+          </div>
+        );
+
+      case "waiting_unlock":
+        return (
+          <div className="flex justify-center">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge
+                    variant="secondary"
+                    className="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 whitespace-nowrap flex items-center gap-1"
+                  >
+                    🕒 Waiting for Unlock
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    This item was purchased on an external bot and is pending
+                    delivery to your Steam inventory
+                  </p>
+                  {item.unlock_at && (
+                    <p className="text-xs text-muted-foreground">
+                      Expected delivery:{" "}
+                      {new Date(item.unlock_at).toLocaleDateString()}
+                    </p>
+                  )}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
+
+      case "trade_ban":
+        const daysLeft = item.trade_ban_until
+          ? getDaysLeft(item.trade_ban_until)
+          : 0;
+        return (
+          <div className="flex justify-center">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge
+                    variant="destructive"
+                    className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 whitespace-nowrap flex items-center gap-1"
+                  >
+                    🔒 Trade Ban - {daysLeft}d Left
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    This item is in your Steam inventory but still under trade
+                    cooldown
+                  </p>
+                  {item.trade_ban_until && (
+                    <p className="text-xs text-muted-foreground">
+                      Will be tradable on:{" "}
+                      {new Date(item.trade_ban_until).toLocaleDateString()}
+                    </p>
+                  )}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
+
+      case "ready_to_trade":
+        return (
+          <div className="flex justify-center">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge
+                    variant="default"
+                    className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 whitespace-nowrap flex items-center gap-1"
+                  >
+                    ✅ Ready to Trade/Sell
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    This item is tradeable and ready to be sold on any
+                    marketplace
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="flex justify-center">
+            <Badge
+              variant="secondary"
+              className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 whitespace-nowrap"
+            >
+              In Inventory
+            </Badge>
+          </div>
+        );
     }
   };
-
   const getProfitDisplay = (item: TradingItem) => {
     if (item.status === "sold") {
       const isPositive = item.profit >= 0;
