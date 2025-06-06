@@ -1034,6 +1034,15 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     <TableRow key={item.id} className="hover:bg-muted/50">
                       {visibleColumns.map((column) => (
                         <TableCell key={column.id}>
+                          {column.id === "itemImage" && (
+                            <div className="flex items-center justify-center">
+                              <div className="w-20 h-15 bg-muted rounded border-2 border-dashed border-muted-foreground/20 flex items-center justify-center">
+                                <span className="text-xs text-muted-foreground">
+                                  IMG
+                                </span>
+                              </div>
+                            </div>
+                          )}
                           {column.id === "itemName" && (
                             <div className="max-w-[250px]">
                               <div className="truncate font-medium">
