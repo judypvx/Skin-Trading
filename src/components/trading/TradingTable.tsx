@@ -372,7 +372,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                 <TooltipTrigger>
                   <Badge
                     variant="destructive"
-                    className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 whitespace-nowrap flex items-center gap-1"
+                    className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 whitespace-nowrap flex items-center gap-1"
                   >
                     🔒 Trade Ban - {daysLeft}d Left
                   </Badge>
@@ -423,9 +423,9 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
           <div className="flex justify-center">
             <Badge
               variant="secondary"
-              className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 whitespace-nowrap"
+              className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 whitespace-nowrap"
             >
-              In Inventory
+              Unlocked
             </Badge>
           </div>
         );
