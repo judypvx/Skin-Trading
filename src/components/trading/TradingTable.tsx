@@ -765,7 +765,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                   {filteredAndSortedItems.map((item) => (
                     <TableRow key={item.id} className="hover:bg-muted/50 h-16">
                       {visibleColumns.map((column) => (
-                        <TableCell key={column.id}>
+                        <TableCell key={column.id} className="py-4">
                           {column.id === "itemImage" && (
                             <div className="flex items-center justify-center">
                               <div className="w-20 h-15 bg-muted rounded border-2 border-dashed border-muted-foreground/20 flex items-center justify-center">
