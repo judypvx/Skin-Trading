@@ -487,14 +487,14 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
       return (
         <div className="flex items-center justify-center">
-          <div
-            className={`flex items-center gap-1 ${colorClass} whitespace-nowrap`}
-          >
-            <Icon className="h-3 w-3" />
-            <span className="font-medium">{formatCurrency(item.profit)}</span>
-            <span className="text-xs opacity-80">
+          <div className={`text-center ${colorClass}`}>
+            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+              <Icon className="h-3 w-3" />
+              <span className="font-medium">{formatCurrency(item.profit)}</span>
+            </div>
+            <div className="text-xs opacity-80 mt-0.5">
               ({formatPercentage(item.profitPercentage)})
-            </span>
+            </div>
           </div>
         </div>
       );
@@ -519,9 +519,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                 {formatCurrency(item.potentialProfit)}
               </span>
             </div>
-            <div className="text-xs opacity-80 mt-1">
-              ({isPositive ? "+" : ""}
-              {potentialProfitPercentage.toFixed(2)}%)
+            <div className="text-xs opacity-80 mt-0.5">
+              ({formatPercentage(potentialProfitPercentage)})
             </div>
           </div>
         </div>
