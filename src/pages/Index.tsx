@@ -143,10 +143,6 @@ const Index = () => {
                   <span>Connected to Market.CSGO</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span>Connected to Buff163</span>
-                </div>
-                <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                   <span>Steam Market (Manual)</span>
                 </div>
@@ -235,15 +231,7 @@ const Index = () => {
                     Online
                   </Badge>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Buff163</span>
-                  <Badge
-                    variant="secondary"
-                    className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                  >
-                    Slow
-                  </Badge>
-                </div>
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Steam Market</span>
                   <Badge
