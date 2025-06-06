@@ -76,7 +76,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [settings, setSettings] =
     useState<TradingTableSettings>(loadSettings());
-  const [activeTab, setActiveTab] = useState<"inventory" | "ready" | "history">(
+  const [activeTab, setActiveTab] = useState<"inventory" | "history">(
     "inventory",
   );
   const [dateRange, setDateRange] = useState<{
