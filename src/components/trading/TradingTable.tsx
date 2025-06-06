@@ -31,7 +31,6 @@ import {
   Star,
   Gem,
   GripVertical,
-  Settings,
 } from "lucide-react";
 import {
   TradingItem,
@@ -83,21 +82,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   const [resizingColumn, setResizingColumn] = useState<string | null>(null);
   const resizeStartX = useRef<number>(0);
   const resizeStartWidth = useRef<number>(0);
-
-  // Detect if running in Visual Editor
-  const isInVisualEditor = useMemo(() => {
-    if (typeof window === "undefined") return false;
-
-    // Check for common Visual Editor indicators
-    return !!(
-      window.parent !== window || // In iframe
-      document.querySelector("[data-loc]") || // Builder.io data-loc attributes
-      window.location.href.includes("builder") ||
-      window.location.href.includes("preview") ||
-      (window as any).__BUILDER_PREVIEW__ ||
-      (window as any).parent?.postMessage
-    );
-  }, []);
 
   // Save settings whenever they change
   useEffect(() => {
@@ -199,24 +183,16 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
   // Column drag and drop handlers
   const handleColumnDragStart = (e: React.DragEvent, columnId: string) => {
-    if (isInVisualEditor) {
-      e.preventDefault();
-      toast.info("Column reordering is disabled in Visual Editor mode");
-      return;
-    }
-
     setDraggedColumn(columnId);
     e.dataTransfer.effectAllowed = "move";
   };
 
   const handleColumnDragOver = (e: React.DragEvent) => {
-    if (isInVisualEditor) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
 
   const handleColumnDrop = (e: React.DragEvent, targetColumnId: string) => {
-    if (isInVisualEditor) return;
     e.preventDefault();
 
     if (!draggedColumn || draggedColumn === targetColumnId) {
@@ -262,15 +238,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
   // Column resize handlers
   const handleResizeStart = (e: React.MouseEvent, columnId: string) => {
-    if (isInVisualEditor) {
-      e.preventDefault();
-      e.stopPropagation();
-      toast.info(
-        "Column resizing is disabled in Visual Editor mode. Try this in production!",
-      );
-      return;
-    }
-
     e.preventDefault();
     e.stopPropagation(); // Prevent triggering sort
 
@@ -302,22 +269,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
-  };
-
-  // Alternative column width adjustment for Visual Editor
-  const handleColumnWidthChange = (columnId: string, adjustment: number) => {
-    const column = settings.columns.find((col) => col.id === columnId);
-    const currentWidth = column?.width || 120;
-    const newWidth = Math.max(80, Math.min(400, currentWidth + adjustment));
-
-    setSettings((prev) => ({
-      ...prev,
-      columns: prev.columns.map((col) =>
-        col.id === columnId ? { ...col, width: newWidth } : col,
-      ),
-    }));
-
-    toast.success(`Column width: ${newWidth}px`);
   };
 
   const getStatusBadge = (status: string) => {
@@ -526,18 +477,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
             <span className="text-sm font-normal text-muted-foreground">
               {filteredAndSortedItems.length} of {items.length} items
             </span>
-            {isInVisualEditor && (
-              <Badge variant="outline" className="text-xs">
-                Visual Editor Mode
-              </Badge>
-            )}
           </CardTitle>
-
-          {isInVisualEditor && (
-            <div className="text-xs text-muted-foreground">
-              Column resizing disabled in editor. Works in production!
-            </div>
-          )}
         </div>
 
         <div className="flex flex-col lg:flex-row gap-4">
@@ -621,7 +561,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     key={column.id}
                     className="hover:bg-muted/50 relative group select-none"
                     style={{ width: column.width }}
-                    draggable={!isInVisualEditor}
+                    draggable
                     onDragStart={(e) => handleColumnDragStart(e, column.id)}
                     onDragOver={handleColumnDragOver}
                     onDrop={(e) => handleColumnDrop(e, column.id)}
@@ -638,9 +578,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                           }
                         }}
                       >
-                        {!isInVisualEditor && (
-                          <GripVertical className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        )}
+                        <GripVertical className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         {column.label}
                         {column.id !== "stickersCharm" &&
                           column.id !== "marketLinks" && (
@@ -648,43 +586,13 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                           )}
                       </div>
 
-                      {/* Visual Editor alternative: buttons for width adjustment */}
-                      {isInVisualEditor ? (
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-4 w-4 p-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleColumnWidthChange(column.id, -20);
-                            }}
-                            title="Decrease width"
-                          >
-                            -
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-4 w-4 p-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleColumnWidthChange(column.id, 20);
-                            }}
-                            title="Increase width"
-                          >
-                            +
-                          </Button>
-                        </div>
-                      ) : (
-                        /* Standard resize handle for production */
-                        <div
-                          className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-primary/30 opacity-0 group-hover:opacity-100 transition-all duration-200 border-r-2 border-transparent hover:border-primary/50"
-                          onMouseDown={(e) => handleResizeStart(e, column.id)}
-                          onClick={(e) => e.stopPropagation()}
-                          title="Drag to resize column"
-                        />
-                      )}
+                      {/* Resize handle */}
+                      <div
+                        className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-primary/30 opacity-0 group-hover:opacity-100 transition-all duration-200 border-r-2 border-transparent hover:border-primary/50"
+                        onMouseDown={(e) => handleResizeStart(e, column.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        title="Drag to resize column"
+                      />
                     </div>
                   </TableHead>
                 ))}
