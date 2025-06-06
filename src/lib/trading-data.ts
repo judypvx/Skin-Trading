@@ -101,6 +101,8 @@ export const mockTradingItems: TradingItem[] = [
     status: "unsold",
     sellPrice: null,
     sellDate: null,
+    targetSellMarket: "Lis-Skins",
+    currentMarketPrice: 4299.99,
     profit: 0,
     profitPercentage: 0,
     potentialProfit: 450.0,
