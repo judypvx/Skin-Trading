@@ -961,7 +961,12 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                             <span>{formatDate(item.buyDate)}</span>
                           )}
                           {column.id === "market" && (
-                            <Badge variant="outline">{item.market}</Badge>
+                            <Badge
+                              variant="outline"
+                              className="whitespace-nowrap"
+                            >
+                              {item.market}
+                            </Badge>
                           )}
                           {column.id === "assetId" && (
                             <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
