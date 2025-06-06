@@ -200,7 +200,39 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
       const matchesAccount =
         accountFilters.length === 0 || accountFilters.includes(item.accountId);
 
-      return matchesSearch && matchesTab && matchesMarket && matchesAccount;
+      // Date range filtering (only for sell history tab)
+      let matchesDateRange = true;
+      if (activeTab === "history" && item.status === "sold" && item.sellDate) {
+        if (dateRange.startDate || dateRange.endDate) {
+          const sellDate = new Date(item.sellDate);
+          const startDate = dateRange.startDate
+            ? new Date(dateRange.startDate)
+            : null;
+          const endDate = dateRange.endDate
+            ? new Date(dateRange.endDate)
+            : null;
+
+          // Set time to start/end of day for proper comparison
+          if (startDate) {
+            startDate.setHours(0, 0, 0, 0);
+          }
+          if (endDate) {
+            endDate.setHours(23, 59, 59, 999);
+          }
+
+          matchesDateRange =
+            (!startDate || sellDate >= startDate) &&
+            (!endDate || sellDate <= endDate);
+        }
+      }
+
+      return (
+        matchesSearch &&
+        matchesTab &&
+        matchesMarket &&
+        matchesAccount &&
+        matchesDateRange
+      );
     });
 
     filtered.sort((a, b) => {
