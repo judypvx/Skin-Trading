@@ -52,7 +52,12 @@ export const loadSettings = (): TradingTableSettings => {
   const saved = localStorage.getItem("tradingTableSettings");
   if (saved) {
     try {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      // Filter out assetId column if it exists in saved settings
+      parsed.columns = parsed.columns.filter(
+        (col: ColumnSettings) => col.id !== "assetId",
+      );
+      return parsed;
     } catch {
       return defaultTradingTableSettings;
     }
