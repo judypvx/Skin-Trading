@@ -74,8 +74,14 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   const [accountFilters, setAccountFilters] = useState<string[]>([]);
   const [sortField, setSortField] = useState<SortField>("buyDate");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const [settings, setSettings] =
-    useState<TradingTableSettings>(loadSettings());
+  const [settings, setSettings] = useState<TradingTableSettings>(() => {
+    const loadedSettings = loadSettings();
+    // Ensure Asset ID column is completely removed
+    loadedSettings.columns = loadedSettings.columns.filter(
+      (col) => col.id !== "assetId",
+    );
+    return loadedSettings;
+  });
   const [activeTab, setActiveTab] = useState<"inventory" | "history">(
     "inventory",
   );
