@@ -303,10 +303,7 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
                       <Info className="h-4 w-4 text-muted-foreground hover:text-foreground cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>
-                        Select which marketplace to use for calculating
-                        inventory values
-                      </p>
+                      <p>Choose marketplace for inventory value calculations</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
