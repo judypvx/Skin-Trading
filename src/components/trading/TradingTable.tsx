@@ -1544,22 +1544,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                             </code>
                           )}
                           {column.id === "status" && getStatusBadge(item)}
-                          {column.id === "sellInfo" && (
-                            <div className="flex items-center justify-center">
-                              {item.status === "sold" ? (
-                                <div className="text-center">
-                                  <div className="font-medium">
-                                    {formatCurrency(item.sellPrice!)}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground whitespace-nowrap">
-                                    {formatDate(item.sellDate!)}
-                                  </div>
-                                </div>
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
-                            </div>
-                          )}
+                          {column.id === "sellInfo" && getSellInfoDisplay(item)}
                           {column.id === "profit" && getProfitDisplay(item)}
                           {column.id === "stickersCharm" &&
                             getStickersAndCharmDisplay(item)}
