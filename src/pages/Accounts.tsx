@@ -201,26 +201,6 @@ const Accounts = () => {
               {isRefreshing ? "Refreshing..." : "Refresh All"}
             </Button>
           </div>
-
-          <div className="flex gap-2 ml-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportAccounts}
-              className="gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export CSV
-            </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Upload className="h-4 w-4" />
-              Import CSV
-            </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Settings className="h-4 w-4" />
-              Bot Settings
-            </Button>
-          </div>
         </div>
 
         {/* Accounts Table */}
