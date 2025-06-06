@@ -76,9 +76,9 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [settings, setSettings] = useState<TradingTableSettings>(() => {
     const loadedSettings = loadSettings();
-    // Ensure Asset ID column is completely removed
+    // Ensure Asset ID and Image columns are completely removed
     loadedSettings.columns = loadedSettings.columns.filter(
-      (col) => col.id !== "assetId",
+      (col) => col.id !== "assetId" && col.id !== "itemImage",
     );
     return loadedSettings;
   });
@@ -95,11 +95,11 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     preset: "all-time",
   });
 
-  // Force clear Asset ID column from localStorage on mount
+  // Force clear Asset ID and Image columns from localStorage on mount
   useEffect(() => {
     const currentSettings = loadSettings();
     const filteredColumns = currentSettings.columns.filter(
-      (col) => col.id !== "assetId",
+      (col) => col.id !== "assetId" && col.id !== "itemImage",
     );
     if (filteredColumns.length !== currentSettings.columns.length) {
       const newSettings = { ...currentSettings, columns: filteredColumns };
@@ -607,6 +607,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
   const visibleColumns = settings.columns
     .filter((col) => col.visible)
+    .filter((col) => col.id !== "itemImage" && col.id !== "assetId") // Hard filter
     .sort((a, b) => a.order - b.order);
 
   const markets = ["Lis-Skins", "Market.CSGO", "Steam Market"];
@@ -785,15 +786,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     <TableRow key={item.id} className="hover:bg-muted/50 h-16">
                       {visibleColumns.map((column) => (
                         <TableCell key={column.id} className="py-4">
-                          {column.id === "itemImage" && (
-                            <div className="flex items-center justify-center">
-                              <div className="w-20 h-15 bg-muted rounded border-2 border-dashed border-muted-foreground/20 flex items-center justify-center">
-                                <span className="text-xs text-muted-foreground">
-                                  IMG
-                                </span>
-                              </div>
-                            </div>
-                          )}
                           {column.id === "itemName" && (
                             <div className="flex items-center gap-2 max-w-[300px]">
                               <div className="flex-shrink-0">
@@ -1475,15 +1467,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     <TableRow key={item.id} className="hover:bg-muted/50 h-16">
                       {visibleColumns.map((column) => (
                         <TableCell key={column.id} className="py-4">
-                          {column.id === "itemImage" && (
-                            <div className="flex items-center justify-center">
-                              <div className="w-20 h-15 bg-muted rounded border-2 border-dashed border-muted-foreground/20 flex items-center justify-center">
-                                <span className="text-xs text-muted-foreground">
-                                  IMG
-                                </span>
-                              </div>
-                            </div>
-                          )}
                           {column.id === "itemName" && (
                             <div className="flex items-center gap-2 max-w-[300px]">
                               <div className="flex-shrink-0">
