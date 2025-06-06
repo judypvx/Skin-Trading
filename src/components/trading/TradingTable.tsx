@@ -378,20 +378,19 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   };
 
   const getStickersAndCharmDisplay = (item: TradingItem) => {
-    const maxStickers = 4;
+    const maxStickers = 3;
     const visibleStickers = item.stickers.slice(0, maxStickers);
     const remainingCount = item.stickers.length - maxStickers;
 
     return (
-      <div className="flex items-center gap-1 overflow-hidden">
+      <div className="flex items-center justify-center gap-1 overflow-hidden">
         {item.charm && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <Badge className="text-xs bg-purple-600 text-white hover:bg-purple-700 border-0 rounded-full px-2 py-1 font-medium whitespace-nowrap">
-                  <Gem className="h-3 w-3 mr-1" />
-                  💎
-                </Badge>
+                <div className="w-6 h-6 bg-purple-100 border border-purple-300 rounded flex items-center justify-center">
+                  <span className="text-xs">💎</span>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{item.charm.name}</p>
@@ -403,9 +402,9 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
           <TooltipProvider key={index}>
             <Tooltip>
               <TooltipTrigger>
-                <Badge className="text-xs bg-orange-500 text-white hover:bg-orange-600 border-0 rounded-full px-2 py-1 font-medium whitespace-nowrap">
-                  ⭐ S{index + 1}
-                </Badge>
+                <div className="w-6 h-6 bg-orange-100 border border-orange-300 rounded flex items-center justify-center">
+                  <span className="text-xs">⭐</span>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{sticker.name}</p>
@@ -419,9 +418,9 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
           </TooltipProvider>
         ))}
         {remainingCount > 0 && (
-          <Badge className="text-xs bg-gray-500 text-white border-0 rounded-full px-2 py-1 font-medium whitespace-nowrap">
-            +{remainingCount}
-          </Badge>
+          <div className="w-6 h-6 bg-gray-100 border border-gray-300 rounded flex items-center justify-center">
+            <span className="text-xs">+{remainingCount}</span>
+          </div>
         )}
       </div>
     );
