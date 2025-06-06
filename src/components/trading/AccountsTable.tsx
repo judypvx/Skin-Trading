@@ -389,7 +389,7 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
                     </div>
                   </TableHead>
                   <TableHead
-                    className="cursor-pointer hover:bg-muted/50"
+                    className="cursor-pointer hover:bg-muted/50 min-w-[100px]"
                     onClick={() => handleSort("lisSkinBalance")}
                   >
                     <div className="flex items-center gap-1">
