@@ -182,9 +182,9 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
   const filteredAndSortedItems = useMemo(() => {
     let filtered = items.filter((item) => {
-      const matchesSearch =
-        item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.assetId.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = item.itemName
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
       // Tab-based filtering
       const matchesTab =
