@@ -307,22 +307,52 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     setAccountFilters(allAccountIds);
   };
 
-  const getStatusBadge = (status: string) => {
-    return status === "sold" ? (
-      <Badge
-        variant="default"
-        className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 whitespace-nowrap"
-      >
-        Sold
-      </Badge>
-    ) : (
-      <Badge
-        variant="secondary"
-        className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 whitespace-nowrap"
-      >
-        In Inventory
-      </Badge>
-    );
+  const getStatusBadge = (item: TradingItem) => {
+    if (item.status === "sold") {
+      return (
+        <Badge
+          variant="default"
+          className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 whitespace-nowrap"
+        >
+          Sold
+        </Badge>
+      );
+    } else if (item.status === "locked") {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge
+                variant="secondary"
+                className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 whitespace-nowrap flex items-center gap-1"
+              >
+                🔒 Waiting Unlock
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                This item is currently trade-locked and will become tradable
+                soon
+              </p>
+              {item.unlock_at && (
+                <p className="text-xs text-muted-foreground">
+                  Unlocks: {new Date(item.unlock_at).toLocaleDateString()}
+                </p>
+              )}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    } else {
+      return (
+        <Badge
+          variant="secondary"
+          className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 whitespace-nowrap"
+        >
+          In Inventory
+        </Badge>
+      );
+    }
   };
 
   const getProfitDisplay = (item: TradingItem) => {
