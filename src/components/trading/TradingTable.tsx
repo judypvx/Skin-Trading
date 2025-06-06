@@ -189,7 +189,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
       // Tab-based filtering
       const matchesTab =
         activeTab === "inventory"
-          ? item.status === "unsold"
+          ? item.status === "unsold" || item.status === "locked"
           : item.status === "sold";
 
       // Multi-select market filtering - if no markets selected, show all
