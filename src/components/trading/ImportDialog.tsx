@@ -36,7 +36,6 @@ const ImportDialog = ({ onImportSuccess }: ImportDialogProps) => {
   const platforms = [
     { value: "Lis-Skins", label: "Lis-Skins", available: true },
     { value: "Market.CSGO", label: "Market.CSGO", available: true },
-    { value: "Buff163", label: "Buff163", available: true },
     { value: "Steam Market", label: "Steam Market", available: false },
   ];
 
