@@ -65,8 +65,8 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [stateFilter, setStateFilter] = useState("all");
   const [inventoryValueMarket, setInventoryValueMarket] = useState<
-    "Lis-Skins" | "Market.CSGO" | "Steam Market"
-  >("Lis-Skins");
+    "Market.CSGO" | "Steam Market"
+  >("Market.CSGO");
   const [sortField, setSortField] = useState<SortField>("lastActivity");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
