@@ -94,6 +94,92 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     saveSettings(settings);
   }, [settings]);
 
+  // Date preset calculations
+  const getDatePresetRange = (preset: string) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    switch (preset) {
+      case "today":
+        return {
+          startDate: today.toISOString().split("T")[0],
+          endDate: today.toISOString().split("T")[0],
+        };
+      case "yesterday":
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        return {
+          startDate: yesterday.toISOString().split("T")[0],
+          endDate: yesterday.toISOString().split("T")[0],
+        };
+      case "last-7-days":
+        const week = new Date(today);
+        week.setDate(week.getDate() - 7);
+        return {
+          startDate: week.toISOString().split("T")[0],
+          endDate: today.toISOString().split("T")[0],
+        };
+      case "last-30-days":
+        const month = new Date(today);
+        month.setDate(month.getDate() - 30);
+        return {
+          startDate: month.toISOString().split("T")[0],
+          endDate: today.toISOString().split("T")[0],
+        };
+      case "this-month":
+        const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        return {
+          startDate: thisMonthStart.toISOString().split("T")[0],
+          endDate: today.toISOString().split("T")[0],
+        };
+      case "last-month":
+        const lastMonthStart = new Date(
+          now.getFullYear(),
+          now.getMonth() - 1,
+          1,
+        );
+        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+        return {
+          startDate: lastMonthStart.toISOString().split("T")[0],
+          endDate: lastMonthEnd.toISOString().split("T")[0],
+        };
+      case "all-time":
+      default:
+        return {
+          startDate: null,
+          endDate: null,
+        };
+    }
+  };
+
+  const handleDatePresetChange = (preset: string) => {
+    const range = getDatePresetRange(preset);
+    setDateRange({
+      startDate: range.startDate,
+      endDate: range.endDate,
+      preset,
+    });
+  };
+
+  const handleCustomDateChange = (
+    field: "startDate" | "endDate",
+    value: string,
+  ) => {
+    setDateRange((prev) => ({
+      ...prev,
+      [field]: value || null,
+      preset: "custom",
+    }));
+  };
+
+  const clearDateFilter = () => {
+    setDateRange({
+      startDate: null,
+      endDate: null,
+      preset: "all-time",
+    });
+  };
+
   const filteredAndSortedItems = useMemo(() => {
     let filtered = items.filter((item) => {
       const matchesSearch =
