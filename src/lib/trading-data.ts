@@ -612,7 +612,11 @@ export const calculateStats = (items: TradingItem[]): TradingStats => {
         soldItems.length
       : 0;
   const itemsInInventory = items.filter(
-    (item) => item.status === "unsold" || item.status === "locked",
+    (item) =>
+      item.status === "unsold" ||
+      item.status === "waiting_unlock" ||
+      item.status === "trade_ban" ||
+      item.status === "ready_to_trade",
   ).length;
 
   return {
