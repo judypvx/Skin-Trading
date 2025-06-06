@@ -188,6 +188,35 @@ const Index = () => {
           </Card>
         </div>
 
+        {/* Time Period Selector */}
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm font-medium text-muted-foreground">
+              Statistics for:
+            </span>
+            <div className="flex gap-1">
+              {[
+                { value: "today", label: "Today" },
+                { value: "last-7-days", label: "Last 7 Days" },
+                { value: "this-month", label: "This Month" },
+                { value: "all-time", label: "All Time" },
+              ].map((period) => (
+                <Button
+                  key={period.value}
+                  variant={
+                    selectedTimePeriod === period.value ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => setSelectedTimePeriod(period.value)}
+                  className="text-xs h-8"
+                >
+                  {period.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Stats Panel */}
         <StatsPanel stats={stats} />
 
