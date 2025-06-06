@@ -583,7 +583,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     {visibleColumns.map((column) => (
                       <TableHead
                         key={column.id}
-                        className="hover:bg-muted/50 cursor-pointer"
+                        className="hover:bg-muted/50 cursor-pointer text-center"
                         onClick={() => {
                           if (
                             column.id !== "stickersCharm" &&
@@ -594,7 +594,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                           }
                         }}
                       >
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center justify-center gap-1">
                           {column.label}
                           {column.id !== "stickersCharm" &&
                             column.id !== "marketLinks" &&
@@ -604,7 +604,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                         </div>
                       </TableHead>
                     ))}
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
