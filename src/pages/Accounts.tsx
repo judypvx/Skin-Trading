@@ -19,14 +19,7 @@ import {
   calculateAccountStats,
   AccountStats,
 } from "@/lib/account-data";
-import {
-  Users,
-  Plus,
-  RefreshCw,
-  Download,
-  Upload,
-  Settings,
-} from "lucide-react";
+import { Users, Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 const Accounts = () => {
