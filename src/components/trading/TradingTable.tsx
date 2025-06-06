@@ -1187,15 +1187,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  navigator.clipboard.writeText(item.assetId);
-                                  toast.success("Asset ID copied to clipboard");
-                                }}
-                              >
-                                <Copy className="mr-2 h-4 w-4" />
-                                Copy Asset ID
-                              </DropdownMenuItem>
                               <DropdownMenuItem>
                                 <Star className="mr-2 h-4 w-4" />
                                 Add to Watchlist
