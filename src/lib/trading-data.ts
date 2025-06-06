@@ -551,10 +551,11 @@ export const mockTradingItems: TradingItem[] = [
     buyDate: "2024-02-09",
     market: "Steam Market",
     assetId: "SM_777999111",
-    status: "locked",
+    status: "waiting_unlock",
     sellPrice: null,
     sellDate: null,
     unlock_at: "2024-02-16T14:30:00Z", // 7 days from purchase
+    delivered_to_steam: false,
     targetSellMarket: "Market.CSGO",
     currentMarketPrice: 295.75,
     profit: 0,
