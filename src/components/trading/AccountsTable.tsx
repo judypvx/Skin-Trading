@@ -370,7 +370,15 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
                       <ArrowUpDown className="h-3 w-3" />
                     </div>
                   </TableHead>
-
+                  <TableHead
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort("lisSkinBalance")}
+                  >
+                    <div className="flex items-center gap-1">
+                      Lis-Skins Balance
+                      <ArrowUpDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
                   <TableHead
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => handleSort("inventoryValue")}
