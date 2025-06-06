@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import NavigationTabs from "@/components/trading/NavigationTabs";
 import AccountStatsPanel from "@/components/trading/AccountStatsPanel";
 import AccountsTable from "@/components/trading/AccountsTable";
+import AddAccountModal from "@/components/trading/AddAccountModal";
 import {
   SteamAccount,
   mockSteamAccounts,
@@ -34,6 +35,7 @@ const Accounts = () => {
     calculateAccountStats(mockSteamAccounts),
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [addAccountOpen, setAddAccountOpen] = useState(false);
 
   useEffect(() => {
     const newStats = calculateAccountStats(accounts);
@@ -69,8 +71,8 @@ const Accounts = () => {
     }
   };
 
-  const handleAddAccount = () => {
-    toast.info("Add Account feature coming soon");
+  const handleAddAccount = (newAccount: Partial<SteamAccount>) => {
+    setAccounts((prev) => [...prev, newAccount as SteamAccount]);
   };
 
   const handleExportAccounts = () => {
@@ -191,7 +193,7 @@ const Accounts = () => {
         {/* Action Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex gap-2">
-            <Button onClick={handleAddAccount} className="gap-2">
+            <Button onClick={() => setAddAccountOpen(true)} className="gap-2">
               <Plus className="h-4 w-4" />
               Add Account
             </Button>
@@ -246,8 +248,13 @@ const Accounts = () => {
           </p>
         </footer>
       </main>
+
+      <AddAccountModal
+        open={addAccountOpen}
+        onOpenChange={setAddAccountOpen}
+        onAdd={handleAddAccount}
+      />
     </div>
   );
 };
-
 export default Accounts;
