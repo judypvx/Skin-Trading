@@ -535,7 +535,11 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
   // Calculate tab counts
   const inventoryCount = items.filter(
-    (item) => item.status === "unsold" || item.status === "locked",
+    (item) =>
+      item.status === "unsold" ||
+      item.status === "waiting_unlock" ||
+      item.status === "trade_ban" ||
+      item.status === "ready_to_trade",
   ).length;
   const historyCount = items.filter((item) => item.status === "sold").length;
 
