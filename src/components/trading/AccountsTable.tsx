@@ -483,7 +483,9 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
                     <TableCell className="font-medium">
                       {formatCurrency(account.marketCSGOBalance)}
                     </TableCell>
-
+                    <TableCell className="font-medium">
+                      {formatCurrency(account.lisSkinBalance)}
+                    </TableCell>
                     <TableCell className="font-medium">
                       {getInventoryValue(account)}
                     </TableCell>
