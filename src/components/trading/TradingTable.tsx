@@ -79,6 +79,15 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   const [activeTab, setActiveTab] = useState<"inventory" | "history">(
     "inventory",
   );
+  const [dateRange, setDateRange] = useState<{
+    startDate: string | null;
+    endDate: string | null;
+    preset: string;
+  }>({
+    startDate: null,
+    endDate: null,
+    preset: "all-time",
+  });
 
   // Save settings whenever they change
   useEffect(() => {
