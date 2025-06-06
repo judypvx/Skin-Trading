@@ -264,6 +264,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     sortField,
     sortDirection,
     activeTab,
+    dateRange,
   ]);
 
   const handleSort = (field: SortField) => {
