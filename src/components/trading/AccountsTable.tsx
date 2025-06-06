@@ -277,7 +277,7 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
                 value={inventoryValueMarket}
                 onValueChange={(value) =>
                   setInventoryValueMarket(
-                    value as "Lis-Skins" | "Market.CSGO" | "Steam Market",
+                    value as "Market.CSGO" | "Steam Market",
                   )
                 }
               >
@@ -285,7 +285,6 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Lis-Skins">Lis-Skins</SelectItem>
                   <SelectItem value="Market.CSGO">Market.CSGO</SelectItem>
                   <SelectItem value="Steam Market">Steam Market</SelectItem>
                 </SelectContent>
