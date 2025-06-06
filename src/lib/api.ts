@@ -9,7 +9,7 @@ export interface ImportResult {
 
 export interface ApiCredentials {
   apiKey: string;
-  platform: "Lis-Skins" | "Market.CSGO" | "Buff163" | "Steam Market";
+  platform: "Lis-Skins" | "Market.CSGO" | "Steam Market";
 }
 
 // Placeholder API functions for future implementation
@@ -41,20 +41,6 @@ export const importFromMarketCSGO = async (
   };
 };
 
-export const importFromBuff163 = async (
-  apiKey: string,
-): Promise<ImportResult> => {
-  // Simulate API call
-  await new Promise((resolve) => setTimeout(resolve, 3000));
-
-  return {
-    success: true,
-    itemsImported: 5,
-    message: "Successfully imported 5 items from Buff163",
-    items: [],
-  };
-};
-
 export const importFromSteamMarket = async (
   apiKey: string,
 ): Promise<ImportResult> => {
@@ -75,8 +61,6 @@ export const getImportFunction = (platform: string) => {
       return importFromLisSkins;
     case "Market.CSGO":
       return importFromMarketCSGO;
-    case "Buff163":
-      return importFromBuff163;
     case "Steam Market":
       return importFromSteamMarket;
     default:
