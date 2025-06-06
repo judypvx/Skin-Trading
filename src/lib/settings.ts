@@ -10,6 +10,7 @@ export interface TradingTableSettings {
   columns: ColumnSettings[];
   showMarketLinks: boolean;
   showMarketIcons: boolean;
+  version?: number; // Add version for cleanup
 }
 
 export const defaultTradingColumns: ColumnSettings[] = [
