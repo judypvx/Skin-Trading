@@ -164,10 +164,6 @@ const Index = () => {
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex gap-2">
             <ImportDialog onImportSuccess={handleImportSuccess} />
-            <Button variant="outline" className="gap-2">
-              <Upload className="h-4 w-4" />
-              Quick Add Trade
-            </Button>
           </div>
 
           <div className="flex gap-2 ml-auto">
@@ -190,7 +186,6 @@ const Index = () => {
             </Button>
           </div>
         </div>
-
         {/* Trading Table */}
         <TradingTable items={items} onUpdateItem={handleUpdateItem} />
 
