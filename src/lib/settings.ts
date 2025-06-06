@@ -13,26 +13,27 @@ export interface TradingTableSettings {
 }
 
 export const defaultTradingColumns: ColumnSettings[] = [
-  { id: "itemName", label: "Item Name", visible: true, order: 1, width: 300 },
-  { id: "buyPrice", label: "Buy Price", visible: true, order: 2, width: 120 },
-  { id: "buyDate", label: "Buy Date", visible: true, order: 3, width: 120 },
-  { id: "market", label: "Market", visible: true, order: 4, width: 140 },
-  { id: "assetId", label: "Asset ID", visible: true, order: 5, width: 140 },
-  { id: "status", label: "Status", visible: true, order: 6, width: 120 },
-  { id: "sellInfo", label: "Sell Info", visible: true, order: 7, width: 150 },
-  { id: "profit", label: "Profit", visible: true, order: 8, width: 150 },
+  { id: "itemImage", label: "Image", visible: true, order: 1, width: 100 },
+  { id: "itemName", label: "Item Name", visible: true, order: 2, width: 300 },
+  { id: "buyPrice", label: "Buy Price", visible: true, order: 3, width: 120 },
+  { id: "buyDate", label: "Buy Date", visible: true, order: 4, width: 120 },
+  { id: "market", label: "Market", visible: true, order: 5, width: 140 },
+  { id: "assetId", label: "Asset ID", visible: true, order: 6, width: 140 },
+  { id: "status", label: "Status", visible: true, order: 7, width: 120 },
+  { id: "sellInfo", label: "Sell Info", visible: true, order: 8, width: 150 },
+  { id: "profit", label: "Profit", visible: true, order: 9, width: 150 },
   {
     id: "stickersCharm",
     label: "Stickers & Charm",
     visible: true,
-    order: 9,
-    width: 200,
+    order: 10,
+    width: 120,
   },
   {
     id: "marketLinks",
     label: "Market Links",
     visible: true,
-    order: 10,
+    order: 11,
     width: 120,
   },
 ];
