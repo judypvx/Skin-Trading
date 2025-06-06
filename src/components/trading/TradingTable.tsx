@@ -20,6 +20,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   ArrowUpDown,
   Search,
@@ -34,6 +40,9 @@ import {
   Package,
   History,
   X,
+  Users,
+  Calendar as CalendarIcon,
+  Check,
 } from "lucide-react";
 import {
   TradingItem,
@@ -75,7 +84,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [marketFilters, setMarketFilters] = useState<string[]>([]);
-  const [accountFilter, setAccountFilter] = useState("all");
+  const [accountFilters, setAccountFilters] = useState<string[]>([]);
   const [sortField, setSortField] = useState<SortField>("buyDate");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [settings, setSettings] =
@@ -85,6 +94,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   const [activeTab, setActiveTab] = useState<"inventory" | "history">(
     "inventory",
   );
+  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const resizeStartX = useRef<number>(0);
   const resizeStartWidth = useRef<number>(0);
 
@@ -92,6 +103,53 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   useEffect(() => {
     saveSettings(settings);
   }, [settings]);
+
+  // Helper function to check if a date is within range
+  const isDateInRange = (
+    dateString: string | null,
+    from?: Date,
+    to?: Date,
+  ): boolean => {
+    if (!dateString || (!from && !to)) return true;
+
+    const date = new Date(dateString);
+    if (from && date < from) return false;
+    if (to && date > to) return false;
+    return true;
+  };
+
+  // Quick date preset functions
+  const getDatePreset = (preset: string) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    switch (preset) {
+      case "last7days":
+        return {
+          from: new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000),
+          to: today,
+        };
+      case "last30days":
+        return {
+          from: new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000),
+          to: today,
+        };
+      case "thisMonth":
+        return {
+          from: new Date(now.getFullYear(), now.getMonth(), 1),
+          to: today,
+        };
+      case "lastMonth":
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+        return {
+          from: lastMonth,
+          to: lastMonthEnd,
+        };
+      default:
+        return {};
+    }
+  };
 
   const filteredAndSortedItems = useMemo(() => {
     let filtered = items.filter((item) => {
@@ -112,15 +170,27 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
       const matchesMarket =
         marketFilters.length === 0 || marketFilters.includes(item.market);
 
+      // Multi-select account filtering - if no accounts selected, show all
       const matchesAccount =
-        accountFilter === "all" || item.accountId === accountFilter;
+        accountFilters.length === 0 || accountFilters.includes(item.accountId);
+
+      // Date range filtering for sell history
+      let matchesDateRange = true;
+      if (activeTab === "history" && (dateRange.from || dateRange.to)) {
+        matchesDateRange = isDateInRange(
+          item.sellDate,
+          dateRange.from,
+          dateRange.to,
+        );
+      }
 
       return (
         matchesSearch &&
         matchesTab &&
         matchesStatus &&
         matchesMarket &&
-        matchesAccount
+        matchesAccount &&
+        matchesDateRange
       );
     });
 
@@ -150,10 +220,11 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     searchTerm,
     statusFilter,
     marketFilters,
-    accountFilter,
+    accountFilters,
     sortField,
     sortDirection,
     activeTab,
+    dateRange,
   ]);
 
   const handleSort = (field: SortField) => {
@@ -200,8 +271,37 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     }
   };
 
+  const handleAccountFilterChange = (accountId: string, checked: boolean) => {
+    if (checked) {
+      setAccountFilters((prev) => [...prev, accountId]);
+    } else {
+      setAccountFilters((prev) => prev.filter((id) => id !== accountId));
+    }
+  };
+
   const clearAllMarkets = () => {
     setMarketFilters([]);
+  };
+
+  const clearAllAccounts = () => {
+    setAccountFilters([]);
+  };
+
+  const selectAllAccounts = () => {
+    const allAccountIds = mockSteamAccountsBasic
+      .filter((account) => account.id !== "all")
+      .map((account) => account.id);
+    setAccountFilters(allAccountIds);
+  };
+
+  const clearDateRange = () => {
+    setDateRange({});
+  };
+
+  const applyDatePreset = (preset: string) => {
+    const presetRange = getDatePreset(preset);
+    setDateRange(presetRange);
+    setIsDatePickerOpen(false);
   };
 
   // Column drag and drop handlers
@@ -485,6 +585,27 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     );
   };
 
+  const formatDateRange = () => {
+    if (!dateRange.from && !dateRange.to) return "All Time";
+
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    };
+
+    if (dateRange.from && dateRange.to) {
+      return `${formatDate(dateRange.from)} - ${formatDate(dateRange.to)}`;
+    } else if (dateRange.from) {
+      return `From ${formatDate(dateRange.from)}`;
+    } else if (dateRange.to) {
+      return `Until ${formatDate(dateRange.to)}`;
+    }
+
+    return "All Time";
+  };
+
   const renderTable = () => (
     <div className="overflow-x-auto border rounded-lg">
       <Table>
@@ -699,6 +820,9 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     .sort((a, b) => a.order - b.order);
 
   const markets = ["Lis-Skins", "Market.CSGO", "Steam Market"];
+  const nonAllAccounts = mockSteamAccountsBasic.filter(
+    (account) => account.id !== "all",
+  );
 
   return (
     <Card>
@@ -747,18 +871,54 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Select value={accountFilter} onValueChange={setAccountFilter}>
-                  <SelectTrigger className="w-[160px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mockSteamAccountsBasic.map((account) => (
-                      <SelectItem key={account.id} value={account.id}>
-                        {account.nickname}
-                      </SelectItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      <Users className="h-4 w-4" />
+                      Accounts{" "}
+                      {accountFilters.length > 0 &&
+                        `(${accountFilters.length})`}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>Select Accounts</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={selectAllAccounts}
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950"
+                    >
+                      <Check className="h-3 w-3 mr-2" />
+                      Select All
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {nonAllAccounts.map((account) => (
+                      <DropdownMenuItem
+                        key={account.id}
+                        className="flex items-center gap-2 cursor-pointer"
+                        onSelect={(e) => e.preventDefault()}
+                      >
+                        <Checkbox
+                          checked={accountFilters.includes(account.id)}
+                          onCheckedChange={(checked) =>
+                            handleAccountFilterChange(
+                              account.id,
+                              checked as boolean,
+                            )
+                          }
+                        />
+                        <span className="flex-1">{account.nickname}</span>
+                      </DropdownMenuItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={clearAllAccounts}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                    >
+                      <X className="h-3 w-3 mr-2" />
+                      Clear All
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -810,15 +970,18 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     ? "You don't have any items in your inventory yet."
                     : "No items match your current filters."}
                 </p>
-                {marketFilters.length > 0 && (
-                  <Button
-                    variant="link"
-                    onClick={clearAllMarkets}
-                    className="mt-2"
-                  >
-                    Clear market filters
-                  </Button>
-                )}
+                <div className="flex gap-2 justify-center mt-4">
+                  {marketFilters.length > 0 && (
+                    <Button variant="link" onClick={clearAllMarkets}>
+                      Clear market filters
+                    </Button>
+                  )}
+                  {accountFilters.length > 0 && (
+                    <Button variant="link" onClick={clearAllAccounts}>
+                      Clear account filters
+                    </Button>
+                  )}
+                </div>
               </div>
             ) : (
               renderTable()
@@ -838,18 +1001,54 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Select value={accountFilter} onValueChange={setAccountFilter}>
-                  <SelectTrigger className="w-[160px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mockSteamAccountsBasic.map((account) => (
-                      <SelectItem key={account.id} value={account.id}>
-                        {account.nickname}
-                      </SelectItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      <Users className="h-4 w-4" />
+                      Accounts{" "}
+                      {accountFilters.length > 0 &&
+                        `(${accountFilters.length})`}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>Select Accounts</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={selectAllAccounts}
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950"
+                    >
+                      <Check className="h-3 w-3 mr-2" />
+                      Select All
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {nonAllAccounts.map((account) => (
+                      <DropdownMenuItem
+                        key={account.id}
+                        className="flex items-center gap-2 cursor-pointer"
+                        onSelect={(e) => e.preventDefault()}
+                      >
+                        <Checkbox
+                          checked={accountFilters.includes(account.id)}
+                          onCheckedChange={(checked) =>
+                            handleAccountFilterChange(
+                              account.id,
+                              checked as boolean,
+                            )
+                          }
+                        />
+                        <span className="flex-1">{account.nickname}</span>
+                      </DropdownMenuItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={clearAllAccounts}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                    >
+                      <X className="h-3 w-3 mr-2" />
+                      Clear All
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -887,6 +1086,91 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+
+                <Popover
+                  open={isDatePickerOpen}
+                  onOpenChange={setIsDatePickerOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      <CalendarIcon className="h-4 w-4" />
+                      {formatDateRange()}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <div className="p-3 border-b">
+                      <h4 className="font-medium text-sm mb-3">
+                        Filter by sell date
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => applyDatePreset("last7days")}
+                          className="text-xs"
+                        >
+                          Last 7 days
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => applyDatePreset("last30days")}
+                          className="text-xs"
+                        >
+                          Last 30 days
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => applyDatePreset("thisMonth")}
+                          className="text-xs"
+                        >
+                          This Month
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => applyDatePreset("lastMonth")}
+                          className="text-xs"
+                        >
+                          Last Month
+                        </Button>
+                      </div>
+                    </div>
+                    <Calendar
+                      mode="range"
+                      selected={{
+                        from: dateRange.from,
+                        to: dateRange.to,
+                      }}
+                      onSelect={(range) => {
+                        setDateRange({
+                          from: range?.from,
+                          to: range?.to,
+                        });
+                      }}
+                      numberOfMonths={2}
+                      className="rounded-md"
+                    />
+                    <div className="p-3 border-t flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={clearDateRange}
+                        className="flex-1"
+                      >
+                        Clear
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => setIsDatePickerOpen(false)}
+                        className="flex-1"
+                      >
+                        Done
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
@@ -901,15 +1185,23 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     ? "You haven't sold any items yet."
                     : "No sold items match your current filters."}
                 </p>
-                {marketFilters.length > 0 && (
-                  <Button
-                    variant="link"
-                    onClick={clearAllMarkets}
-                    className="mt-2"
-                  >
-                    Clear market filters
-                  </Button>
-                )}
+                <div className="flex gap-2 justify-center mt-4">
+                  {marketFilters.length > 0 && (
+                    <Button variant="link" onClick={clearAllMarkets}>
+                      Clear market filters
+                    </Button>
+                  )}
+                  {accountFilters.length > 0 && (
+                    <Button variant="link" onClick={clearAllAccounts}>
+                      Clear account filters
+                    </Button>
+                  )}
+                  {(dateRange.from || dateRange.to) && (
+                    <Button variant="link" onClick={clearDateRange}>
+                      Clear date range
+                    </Button>
+                  )}
+                </div>
               </div>
             ) : (
               renderTable()
