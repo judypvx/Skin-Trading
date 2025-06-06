@@ -154,7 +154,7 @@ export const mockTradingItems: TradingItem[] = [
     buyDate: "2023-12-20",
     market: "Steam Market",
     assetId: "SM_987654321",
-    status: "unsold",
+    status: "ready_to_trade",
     sellPrice: null,
     sellDate: null,
     targetSellMarket: "Market.CSGO",
