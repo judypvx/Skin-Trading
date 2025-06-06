@@ -27,7 +27,7 @@ const AddAccountModal = ({
   onAdd,
 }: AddAccountModalProps) => {
   const [formData, setFormData] = useState<Partial<SteamAccount>>({
-    nickname: "",
+    nickname: "", // This will be the alias
     login: "",
     password: "",
     proxyFull: "",
@@ -69,9 +69,25 @@ const AddAccountModal = ({
     }
   };
 
+  // Validate proxy format (ip:port:login:pass)
+  const validateProxyFormat = (proxy: string): boolean => {
+    if (!proxy.trim()) return false;
+    const parts = proxy.split(":");
+    return parts.length === 4 && parts.every((part) => part.trim().length > 0);
+  };
+
   const handleAdd = () => {
+    // Validate required fields
     if (!formData.nickname || !formData.login || !formData.password) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+
+    // Validate proxy format
+    if (!formData.proxyFull || !validateProxyFormat(formData.proxyFull)) {
+      toast.error(
+        "Proxy field is required and must be in format: ip:port:login:pass",
+      );
       return;
     }
 
@@ -142,18 +158,21 @@ const AddAccountModal = ({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nickname">
-                    Account Nickname <span className="text-red-500">*</span>
+                  <Label htmlFor="alias">
+                    Alias <span className="text-red-500">*</span>
                   </Label>
                   <Input
-                    id="nickname"
+                    id="alias"
                     type="text"
-                    placeholder="e.g., Trader 1, Bot Account, etc."
+                    placeholder="Enter a name for this account (e.g., Trader 2)"
                     value={formData.nickname}
                     onChange={(e) =>
                       handleInputChange("nickname", e.target.value)
                     }
                   />
+                  <p className="text-sm text-muted-foreground">
+                    This name will be displayed throughout the UI
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -193,7 +212,9 @@ const AddAccountModal = ({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="proxy">Proxy</Label>
+                  <Label htmlFor="proxy">
+                    Proxy <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="proxy"
                     type="text"
@@ -202,10 +223,22 @@ const AddAccountModal = ({
                     onChange={(e) =>
                       handleInputChange("proxyFull", e.target.value)
                     }
+                    className={
+                      formData.proxyFull &&
+                      !validateProxyFormat(formData.proxyFull)
+                        ? "border-red-500"
+                        : ""
+                    }
                   />
                   <p className="text-sm text-muted-foreground">
-                    Format: ip:port:login:pass (Optional)
+                    Required format: ip:port:login:pass
                   </p>
+                  {formData.proxyFull &&
+                    !validateProxyFormat(formData.proxyFull) && (
+                      <p className="text-sm text-red-500">
+                        Invalid format. Please use: ip:port:login:pass
+                      </p>
+                    )}
                 </div>
               </CardContent>
             </Card>
