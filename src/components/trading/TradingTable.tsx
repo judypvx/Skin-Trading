@@ -95,6 +95,19 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     preset: "all-time",
   });
 
+  // Force clear Asset ID column from localStorage on mount
+  useEffect(() => {
+    const currentSettings = loadSettings();
+    const filteredColumns = currentSettings.columns.filter(
+      (col) => col.id !== "assetId",
+    );
+    if (filteredColumns.length !== currentSettings.columns.length) {
+      const newSettings = { ...currentSettings, columns: filteredColumns };
+      saveSettings(newSettings);
+      setSettings(newSettings);
+    }
+  }, []);
+
   // Save settings whenever they change
   useEffect(() => {
     saveSettings(settings);
