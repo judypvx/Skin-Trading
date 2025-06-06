@@ -837,48 +837,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                             </code>
                           )}
                           {column.id === "status" && getStatusBadge(item)}
-                          {column.id === "sellInfo" && (
-                            <div className="flex items-center justify-center">
-                              {item.status === "sold" ? (
-                                <div className="text-center">
-                                  <div className="font-medium">
-                                    {formatCurrency(item.sellPrice!)}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground whitespace-nowrap">
-                                    {formatDate(item.sellDate!)}
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="text-center">
-                                  {item.targetSellMarket &&
-                                  item.currentMarketPrice ? (
-                                    <div className="space-y-1">
-                                      <div className="flex justify-center">
-                                        <Badge
-                                          variant="outline"
-                                          className="text-xs whitespace-nowrap"
-                                        >
-                                          {item.targetSellMarket}
-                                        </Badge>
-                                      </div>
-                                      <div className="font-medium text-blue-600 dark:text-blue-400">
-                                        {formatCurrency(
-                                          item.currentMarketPrice,
-                                        )}
-                                      </div>
-                                      <div className="text-xs text-muted-foreground">
-                                        Current lowest
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <span className="text-muted-foreground">
-                                      —
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          )}
+                          {column.id === "sellInfo" && getSellInfoDisplay(item)}
                           {column.id === "profit" && getProfitDisplay(item)}
                           {column.id === "stickersCharm" &&
                             getStickersAndCharmDisplay(item)}
