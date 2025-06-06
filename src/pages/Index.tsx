@@ -144,7 +144,7 @@ const Index = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <span>Steam Market (Manual)</span>
+                  <span>Steam Market</span>
                 </div>
               </div>
             </CardContent>
