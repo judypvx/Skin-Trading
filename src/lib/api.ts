@@ -2,7 +2,8 @@ import { TradingItem } from "./trading-data";
 
 export interface ImportResult {
   success: boolean;
-  itemsImported: number;
+  itemsImported?: number;
+  itemCount?: number;
   message: string;
   items?: TradingItem[];
 }
