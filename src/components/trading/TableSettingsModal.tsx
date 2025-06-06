@@ -16,7 +16,7 @@ import {
   Droppable,
   Draggable,
   DropResult,
-} from "@hello-pangea/react-beautiful-dnd";
+} from "react-beautiful-dnd";
 import { GripVertical, Eye, EyeOff, RotateCcw, Save, X } from "lucide-react";
 import {
   TradingTableSettings,
