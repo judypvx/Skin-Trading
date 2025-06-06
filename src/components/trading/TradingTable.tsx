@@ -622,9 +622,23 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                             </div>
                           )}
                           {column.id === "itemName" && (
-                            <div className="max-w-[250px]">
-                              <div className="truncate font-medium">
-                                {item.itemName}
+                            <div className="flex items-center gap-2 max-w-[300px]">
+                              <div className="flex-shrink-0">
+                                <img
+                                  src={`https://community.cloudflare.steamstatic.com/economy/image/${item.assetId || "placeholder"}/96fx96f`}
+                                  alt={item.itemName}
+                                  className="w-12 h-12 object-contain rounded"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src =
+                                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' fill='%23374151'/%3E%3Ctext x='24' y='24' text-anchor='middle' dominant-baseline='middle' fill='%23D1D5DB' font-size='8'%3EIMG%3C/text%3E%3C/svg%3E";
+                                  }}
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="truncate font-medium">
+                                  {item.itemName}
+                                </div>
                               </div>
                             </div>
                           )}
