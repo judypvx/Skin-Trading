@@ -105,18 +105,18 @@ const ImportDialog = ({ onImportSuccess }: ImportDialogProps) => {
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Download className="h-4 w-4" />
-          Import Data
+          Update Inventory
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Download className="h-5 w-5" />
-            Import Trading Data
+            Update Inventory
           </DialogTitle>
           <DialogDescription>
-            Import your trading data from various marketplaces or upload a CSV
-            file.
+            Update your trading inventory from various marketplaces or upload a
+            CSV file.
           </DialogDescription>
         </DialogHeader>
 
