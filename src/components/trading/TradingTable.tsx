@@ -239,6 +239,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   // Column resize handlers
   const handleResizeStart = (e: React.MouseEvent, columnId: string) => {
     e.preventDefault();
+    e.stopPropagation(); // Prevent triggering sort
+
     setResizingColumn(columnId);
     resizeStartX.current = e.clientX;
 
@@ -557,23 +559,25 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                 {visibleColumns.map((column) => (
                   <TableHead
                     key={column.id}
-                    className="cursor-pointer hover:bg-muted/50 relative group select-none"
+                    className="hover:bg-muted/50 relative group select-none"
                     style={{ width: column.width }}
                     draggable
                     onDragStart={(e) => handleColumnDragStart(e, column.id)}
                     onDragOver={handleColumnDragOver}
                     onDrop={(e) => handleColumnDrop(e, column.id)}
-                    onClick={() => {
-                      if (
-                        column.id !== "stickersCharm" &&
-                        column.id !== "marketLinks"
-                      ) {
-                        handleSort(column.id as SortField);
-                      }
-                    }}
                   >
                     <div className="flex items-center gap-1 justify-between">
-                      <div className="flex items-center gap-1">
+                      <div
+                        className="flex items-center gap-1 cursor-pointer flex-1"
+                        onClick={() => {
+                          if (
+                            column.id !== "stickersCharm" &&
+                            column.id !== "marketLinks"
+                          ) {
+                            handleSort(column.id as SortField);
+                          }
+                        }}
+                      >
                         <GripVertical className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         {column.label}
                         {column.id !== "stickersCharm" &&
@@ -584,8 +588,10 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
                       {/* Resize handle */}
                       <div
-                        className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-primary/30 opacity-0 group-hover:opacity-100 transition-all duration-200 border-r-2 border-transparent hover:border-primary/50"
                         onMouseDown={(e) => handleResizeStart(e, column.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        title="Drag to resize column"
                       />
                     </div>
                   </TableHead>
