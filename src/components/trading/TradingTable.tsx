@@ -626,12 +626,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
             <span className="text-sm text-muted-foreground">
               {filteredAndSortedItems.length} of{" "}
-              {activeTab === "inventory"
-                ? inventoryCount
-                : activeTab === "ready"
-                  ? readyCount
-                  : historyCount}{" "}
-              items
+              {activeTab === "inventory" ? inventoryCount : historyCount} items
             </span>
           </div>
 
