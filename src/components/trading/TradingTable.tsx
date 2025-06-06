@@ -567,15 +567,19 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
         <Tabs
           value={activeTab}
           onValueChange={(value) =>
-            setActiveTab(value as "inventory" | "history")
+            setActiveTab(value as "inventory" | "ready" | "history")
           }
           className="w-full"
         >
           <div className="flex items-center justify-between">
-            <TabsList className="grid w-fit grid-cols-2">
+            <TabsList className="grid w-fit grid-cols-3">
               <TabsTrigger value="inventory" className="gap-2">
                 <Package className="h-4 w-4" />
                 Inventory ({inventoryCount})
+              </TabsTrigger>
+              <TabsTrigger value="ready" className="gap-2">
+                <Check className="h-4 w-4" />
+                Ready to Trade ({readyCount})
               </TabsTrigger>
               <TabsTrigger value="history" className="gap-2">
                 <History className="h-4 w-4" />
