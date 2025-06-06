@@ -228,16 +228,13 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
   const getStickersAndCharmDisplay = (item: TradingItem) => {
     return (
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-col gap-1 w-[100px]">
         {item.charm && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <Badge
-                  variant="outline"
-                  className="text-xs gap-1 bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300"
-                >
-                  <Gem className="h-3 w-3" />
+                <Badge className="text-xs bg-purple-600 text-white hover:bg-purple-700 border-0 rounded-full px-2 py-1 font-medium">
+                  <Gem className="h-3 w-3 mr-1" />
                   Charm
                 </Badge>
               </TooltipTrigger>
@@ -251,11 +248,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
           <TooltipProvider key={index}>
             <Tooltip>
               <TooltipTrigger>
-                <Badge
-                  variant="outline"
-                  className="text-xs gap-1 bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300"
-                >
-                  <Star className="h-3 w-3" />S{sticker.position}
+                <Badge className="text-xs bg-orange-500 text-white hover:bg-orange-600 border-0 rounded-full px-2 py-1 font-medium">
+                  S{index + 1}
                 </Badge>
               </TooltipTrigger>
               <TooltipContent>
@@ -270,14 +264,13 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
           </TooltipProvider>
         ))}
         {item.stickers.length > 5 && (
-          <Badge variant="outline" className="text-xs">
+          <Badge className="text-xs bg-gray-500 text-white border-0 rounded-full px-2 py-1 font-medium">
             +{item.stickers.length - 5}
           </Badge>
         )}
       </div>
     );
   };
-
   const getMarketLinksDisplay = (item: TradingItem) => {
     if (!settings.showMarketLinks) return null;
 
@@ -508,6 +501,9 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                       <TableCell
                         key={column.id}
                         style={{ width: column.width }}
+                        className={
+                          column.id === "stickersCharm" ? "align-top" : ""
+                        }
                       >
                         {column.id === "itemName" && (
                           <div className="max-w-[250px]">
