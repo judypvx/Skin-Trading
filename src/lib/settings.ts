@@ -41,6 +41,7 @@ export const defaultTradingTableSettings: TradingTableSettings = {
   columns: defaultTradingColumns,
   showMarketLinks: true,
   showMarketIcons: true,
+  version: 2, // Incremented version to force reset
 };
 
 // Local storage helpers
