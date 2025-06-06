@@ -25,8 +25,6 @@ import {
   Download,
   Upload,
   Settings,
-  Shield,
-  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 
