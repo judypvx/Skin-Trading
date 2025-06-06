@@ -984,13 +984,13 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                           {column.id === "status" &&
                             getStatusBadge(item.status)}
                           {column.id === "sellInfo" && (
-                            <div>
+                            <div className="flex items-center justify-center">
                               {item.status === "sold" ? (
-                                <div>
+                                <div className="text-center">
                                   <div className="font-medium">
                                     {formatCurrency(item.sellPrice!)}
                                   </div>
-                                  <div className="text-xs text-muted-foreground">
+                                  <div className="text-xs text-muted-foreground mt-1">
                                     {formatDate(item.sellDate!)}
                                   </div>
                                 </div>
