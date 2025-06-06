@@ -25,6 +25,8 @@ export interface TradingItem {
   sellPrice: number | null;
   sellDate: string | null;
   sellMarket?: "Lis-Skins" | "Market.CSGO" | "Steam Market" | null;
+  targetSellMarket?: "Lis-Skins" | "Market.CSGO" | "Steam Market" | null; // Selected marketplace during import
+  currentMarketPrice?: number; // Current lowest price on target marketplace
   profit: number;
   profitPercentage: number;
   potentialProfit: number;
