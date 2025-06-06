@@ -155,6 +155,8 @@ export const mockTradingItems: TradingItem[] = [
     status: "unsold",
     sellPrice: null,
     sellDate: null,
+    targetSellMarket: "Market.CSGO",
+    currentMarketPrice: 355.5,
     profit: 0,
     profitPercentage: 0,
     potentialProfit: 25.8,
