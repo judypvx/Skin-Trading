@@ -172,14 +172,6 @@ const Accounts = () => {
                     <span>{stats.errorAccounts} Need Attention</span>
                   </div>
                 )}
-                {stats.totalTradeConfirmations > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                    <span>
-                      {stats.totalTradeConfirmations} Pending Confirmations
-                    </span>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
