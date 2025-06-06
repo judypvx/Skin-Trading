@@ -20,12 +20,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   ArrowUpDown,
   Search,
@@ -33,14 +27,12 @@ import {
   MoreHorizontal,
   TrendingUp,
   TrendingDown,
-  ExternalLink,
   Copy,
   Star,
   Gem,
   GripVertical,
   Package,
   History,
-  Calendar as CalendarIcon,
   X,
 } from "lucide-react";
 import {
@@ -49,7 +41,6 @@ import {
   formatPercentage,
   formatDate,
   mockSteamAccountsBasic,
-  SteamAccountBasic,
 } from "@/lib/trading-data";
 import {
   TradingTableSettings,
@@ -71,7 +62,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { format, isAfter, isBefore, parseISO } from "date-fns";
 
 interface TradingTableProps {
   items: TradingItem[];
@@ -95,8 +85,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   const [activeTab, setActiveTab] = useState<"inventory" | "history">(
     "inventory",
   );
-  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const resizeStartX = useRef<number>(0);
   const resizeStartWidth = useRef<number>(0);
 
@@ -127,29 +115,12 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
       const matchesAccount =
         accountFilter === "all" || item.accountId === accountFilter;
 
-      // Date range filtering for sell history
-      let matchesDateRange = true;
-      if (activeTab === "history" && (dateRange.from || dateRange.to)) {
-        if (item.sellDate) {
-          const sellDate = parseISO(item.sellDate);
-          if (dateRange.from && isBefore(sellDate, dateRange.from)) {
-            matchesDateRange = false;
-          }
-          if (dateRange.to && isAfter(sellDate, dateRange.to)) {
-            matchesDateRange = false;
-          }
-        } else {
-          matchesDateRange = false;
-        }
-      }
-
       return (
         matchesSearch &&
         matchesTab &&
         matchesStatus &&
         matchesMarket &&
-        matchesAccount &&
-        matchesDateRange
+        matchesAccount
       );
     });
 
@@ -183,7 +154,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     sortField,
     sortDirection,
     activeTab,
-    dateRange,
   ]);
 
   const handleSort = (field: SortField) => {
@@ -232,10 +202,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
   const clearAllMarkets = () => {
     setMarketFilters([]);
-  };
-
-  const clearDateRange = () => {
-    setDateRange({});
   };
 
   // Column drag and drop handlers
@@ -921,72 +887,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-
-                <Popover
-                  open={isDatePickerOpen}
-                  onOpenChange={setIsDatePickerOpen}
-                >
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="gap-2">
-                      <CalendarIcon className="h-4 w-4" />
-                      {dateRange.from || dateRange.to ? (
-                        <>
-                          {dateRange.from
-                            ? format(dateRange.from, "MMM dd")
-                            : "Start"}{" "}
-                          -{" "}
-                          {dateRange.to
-                            ? format(dateRange.to, "MMM dd")
-                            : "End"}
-                        </>
-                      ) : (
-                        "All Time"
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <div className="p-3 border-b">
-                      <h4 className="font-medium text-sm">
-                        Filter by sell date
-                      </h4>
-                    </div>
-                    <Calendar
-                      mode="range"
-                      selected={{
-                        from: dateRange.from,
-                        to: dateRange.to,
-                      }}
-                      onSelect={(range) => {
-                        setDateRange({
-                          from: range?.from,
-                          to: range?.to,
-                        });
-                        if (range?.from && range?.to) {
-                          setIsDatePickerOpen(false);
-                        }
-                      }}
-                      numberOfMonths={2}
-                      className="rounded-md"
-                    />
-                    <div className="p-3 border-t flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={clearDateRange}
-                        className="flex-1"
-                      >
-                        Clear
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => setIsDatePickerOpen(false)}
-                        className="flex-1"
-                      >
-                        Done
-                      </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
               </div>
             </div>
 
@@ -1001,18 +901,15 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     ? "You haven't sold any items yet."
                     : "No sold items match your current filters."}
                 </p>
-                <div className="flex gap-2 justify-center mt-4">
-                  {marketFilters.length > 0 && (
-                    <Button variant="link" onClick={clearAllMarkets}>
-                      Clear market filters
-                    </Button>
-                  )}
-                  {(dateRange.from || dateRange.to) && (
-                    <Button variant="link" onClick={clearDateRange}>
-                      Clear date range
-                    </Button>
-                  )}
-                </div>
+                {marketFilters.length > 0 && (
+                  <Button
+                    variant="link"
+                    onClick={clearAllMarkets}
+                    className="mt-2"
+                  >
+                    Clear market filters
+                  </Button>
+                )}
               </div>
             ) : (
               renderTable()
