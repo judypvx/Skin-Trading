@@ -150,28 +150,6 @@ const AccountStatsPanel = ({ stats }: AccountStatsPanelProps) => {
         })}
       </div>
 
-      {/* Trade Confirmations Alert */}
-      {stats.totalTradeConfirmations > 0 && (
-        <Card className="border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-orange-800 dark:text-orange-200">
-              Pending Trade Confirmations
-            </CardTitle>
-            <div className="p-2 rounded-full bg-orange-100 dark:bg-orange-900">
-              <Bell className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-              {stats.totalTradeConfirmations}
-            </div>
-            <p className="text-sm text-orange-700 dark:text-orange-300">
-              Trade confirmations require immediate attention
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
