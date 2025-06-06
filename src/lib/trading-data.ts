@@ -539,6 +539,58 @@ export const mockTradingItems: TradingItem[] = [
     },
     accountId: "2",
   },
+  {
+    id: "19",
+    itemName: "AK-47 | Vulcan (Field-Tested)",
+    buyPrice: 285.5,
+    buyDate: "2024-02-09",
+    market: "Steam Market",
+    assetId: "SM_777999111",
+    status: "locked",
+    sellPrice: null,
+    sellDate: null,
+    unlock_at: "2024-02-16T14:30:00Z", // 7 days from purchase
+    targetSellMarket: "Market.CSGO",
+    currentMarketPrice: 295.75,
+    profit: 0,
+    profitPercentage: 0,
+    potentialProfit: 10.25,
+    tags: ["ak47", "vulcan"],
+    stickers: [{ name: "Team EnVyUs | Katowice 2015", wear: 15, position: 1 }],
+    marketLinks: {
+      lisSkins: "https://lis-skins.ru/item/ak47-vulcan-ft",
+      steamMarket:
+        "https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Vulcan%20%28Field-Tested%29",
+      marketCSGO: "https://market.csgo.com/item/ak47-vulcan-ft",
+    },
+    accountId: "3",
+  },
+  {
+    id: "20",
+    itemName: "★ M9 Bayonet | Marble Fade (Factory New)",
+    buyPrice: 1845.0,
+    buyDate: "2024-02-10",
+    market: "Lis-Skins",
+    assetId: "LS_888111222",
+    status: "locked",
+    sellPrice: null,
+    sellDate: null,
+    unlock_at: "2024-02-17T10:15:00Z", // 7 days from purchase
+    targetSellMarket: "Steam Market",
+    currentMarketPrice: 1920.5,
+    profit: 0,
+    profitPercentage: 0,
+    potentialProfit: 75.5,
+    tags: ["knife", "m9", "marble-fade"],
+    stickers: [],
+    marketLinks: {
+      lisSkins: "https://lis-skins.ru/item/m9-bayonet-marble-fade-fn",
+      steamMarket:
+        "https://steamcommunity.com/market/listings/730/%E2%98%85%20M9%20Bayonet%20%7C%20Marble%20Fade%20%28Factory%20New%29",
+      marketCSGO: "https://market.csgo.com/item/m9-bayonet-marble-fade-fn",
+    },
+    accountId: "4",
+  },
 ];
 
 export const calculateStats = (items: TradingItem[]): TradingStats => {
