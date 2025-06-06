@@ -588,7 +588,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                         onClick={() => {
                           if (
                             column.id !== "stickersCharm" &&
-                            column.id !== "marketLinks"
+                            column.id !== "marketLinks" &&
+                            column.id !== "itemImage"
                           ) {
                             handleSort(column.id as SortField);
                           }
@@ -597,7 +598,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                         <div className="flex items-center gap-1">
                           {column.label}
                           {column.id !== "stickersCharm" &&
-                            column.id !== "marketLinks" && (
+                            column.id !== "marketLinks" &&
+                            column.id !== "itemImage" && (
                               <ArrowUpDown className="h-3 w-3" />
                             )}
                         </div>
