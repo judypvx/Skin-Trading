@@ -34,6 +34,8 @@ const Index = () => {
   const [stats, setStats] = useState<TradingStats>(
     calculateStats(mockTradingItems),
   );
+  const [selectedTimePeriod, setSelectedTimePeriod] =
+    useState<string>("all-time");
 
   useEffect(() => {
     const newStats = calculateStats(items);
