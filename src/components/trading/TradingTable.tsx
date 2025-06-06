@@ -20,6 +20,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   ArrowUpDown,
   Search,
@@ -34,6 +40,8 @@ import {
   GripVertical,
   Package,
   History,
+  Calendar as CalendarIcon,
+  X,
 } from "lucide-react";
 import {
   TradingItem,
@@ -63,6 +71,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { format, isAfter, isBefore, parseISO } from "date-fns";
 
 interface TradingTableProps {
   items: TradingItem[];
@@ -86,8 +95,11 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   const [activeTab, setActiveTab] = useState<"inventory" | "history">(
     "inventory",
   );
+  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const resizeStartX = useRef<number>(0);
   const resizeStartWidth = useRef<number>(0);
+
   // Save settings whenever they change
   useEffect(() => {
     saveSettings(settings);
@@ -108,18 +120,36 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
       const matchesStatus =
         statusFilter === "all" || item.status === statusFilter;
 
+      // Multi-select market filtering - if no markets selected, show all
       const matchesMarket =
         marketFilters.length === 0 || marketFilters.includes(item.market);
 
       const matchesAccount =
         accountFilter === "all" || item.accountId === accountFilter;
 
+      // Date range filtering for sell history
+      let matchesDateRange = true;
+      if (activeTab === "history" && (dateRange.from || dateRange.to)) {
+        if (item.sellDate) {
+          const sellDate = parseISO(item.sellDate);
+          if (dateRange.from && isBefore(sellDate, dateRange.from)) {
+            matchesDateRange = false;
+          }
+          if (dateRange.to && isAfter(sellDate, dateRange.to)) {
+            matchesDateRange = false;
+          }
+        } else {
+          matchesDateRange = false;
+        }
+      }
+
       return (
         matchesSearch &&
         matchesTab &&
         matchesStatus &&
         matchesMarket &&
-        matchesAccount
+        matchesAccount &&
+        matchesDateRange
       );
     });
 
@@ -152,6 +182,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     accountFilter,
     sortField,
     sortDirection,
+    activeTab,
+    dateRange,
   ]);
 
   const handleSort = (field: SortField) => {
@@ -196,6 +228,14 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     } else {
       setMarketFilters((prev) => prev.filter((m) => m !== market));
     }
+  };
+
+  const clearAllMarkets = () => {
+    setMarketFilters([]);
+  };
+
+  const clearDateRange = () => {
+    setDateRange({});
   };
 
   // Column drag and drop handlers
@@ -479,17 +519,220 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     );
   };
 
-  const visibleColumns = settings.columns
-    .filter((col) => col.visible)
-    .sort((a, b) => a.order - b.order);
+  const renderTable = () => (
+    <div className="overflow-x-auto border rounded-lg">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {visibleColumns.map((column) => (
+              <TableHead
+                key={column.id}
+                className="hover:bg-muted/50 relative group select-none"
+                style={{ width: column.width }}
+                draggable
+                onDragStart={(e) => handleColumnDragStart(e, column.id)}
+                onDragOver={handleColumnDragOver}
+                onDrop={(e) => handleColumnDrop(e, column.id)}
+              >
+                <div className="flex items-center gap-1 justify-between">
+                  <div
+                    className="flex items-center gap-1 cursor-pointer flex-1"
+                    onClick={() => {
+                      if (
+                        column.id !== "stickersCharm" &&
+                        column.id !== "marketLinks"
+                      ) {
+                        handleSort(column.id as SortField);
+                      }
+                    }}
+                  >
+                    <GripVertical className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {column.label}
+                    {column.id !== "stickersCharm" &&
+                      column.id !== "marketLinks" && (
+                        <ArrowUpDown className="h-3 w-3" />
+                      )}
+                  </div>
 
-  const markets = ["Lis-Skins", "Market.CSGO", "Steam Market"];
+                  {/* Resize handle */}
+                  <div
+                    className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-primary/30 opacity-0 group-hover:opacity-100 transition-all duration-200 border-r-2 border-transparent hover:border-primary/50"
+                    onMouseDown={(e) => handleResizeStart(e, column.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    title="Drag to resize column"
+                  />
+                </div>
+              </TableHead>
+            ))}
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredAndSortedItems.map((item) => (
+            <TableRow key={item.id} className="hover:bg-muted/50">
+              {visibleColumns.map((column) => (
+                <TableCell
+                  key={column.id}
+                  style={{ width: column.width }}
+                  className={column.id === "stickersCharm" ? "align-top" : ""}
+                >
+                  {column.id === "itemName" && (
+                    <div className="max-w-[250px]">
+                      <div
+                        className="truncate font-medium cursor-pointer hover:text-primary"
+                        title={item.itemName}
+                        onClick={() =>
+                          copyToClipboard(item.itemName, "Item name")
+                        }
+                      >
+                        {item.itemName}
+                      </div>
+                      {item.tags.length > 0 && (
+                        <div className="flex gap-1 mt-1">
+                          {item.tags.slice(0, 2).map((tag) => (
+                            <Badge
+                              key={tag}
+                              variant="outline"
+                              className="text-xs whitespace-nowrap"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                          {item.tags.length > 2 && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs whitespace-nowrap"
+                            >
+                              +{item.tags.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {column.id === "buyPrice" && (
+                    <span className="font-medium whitespace-nowrap">
+                      {formatCurrency(item.buyPrice)}
+                    </span>
+                  )}
+                  {column.id === "buyDate" && (
+                    <span className="whitespace-nowrap">
+                      {formatDate(item.buyDate)}
+                    </span>
+                  )}
+                  {column.id === "market" && (
+                    <Badge variant="outline" className="whitespace-nowrap">
+                      {item.market}
+                    </Badge>
+                  )}
+                  {column.id === "assetId" && (
+                    <code className="text-xs bg-muted px-2 py-1 rounded font-mono whitespace-nowrap">
+                      {item.assetId}
+                    </code>
+                  )}
+                  {column.id === "status" && getStatusBadge(item.status)}
+                  {column.id === "sellInfo" && (
+                    <div className="whitespace-nowrap">
+                      {item.status === "sold" ? (
+                        <div>
+                          <div className="font-medium">
+                            {formatCurrency(item.sellPrice!)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {formatDate(item.sellDate!)}
+                          </div>
+                          {item.sellMarket && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs mt-1 whitespace-nowrap"
+                            >
+                              {item.sellMarket}
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </div>
+                  )}
+                  {column.id === "profit" && getProfitDisplay(item)}
+                  {column.id === "stickersCharm" &&
+                    getStickersAndCharmDisplay(item)}
+                  {column.id === "marketLinks" && getMarketLinksDisplay(item)}
+                </TableCell>
+              ))}
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuItem
+                      onClick={() => copyToClipboard(item.assetId, "Asset ID")}
+                      className="gap-2"
+                    >
+                      <Copy className="h-3 w-3" />
+                      Copy Asset ID
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        copyToClipboard(item.itemName, "Item name")
+                      }
+                      className="gap-2"
+                    >
+                      <Copy className="h-3 w-3" />
+                      Copy Item Name
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {item.status === "unsold" && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          const sellPrice = prompt("Enter sell price (USD):");
+                          const sellMarket = prompt(
+                            "Enter sell market (Lis-Skins, Market.CSGO, Steam Market):",
+                          );
+                          if (
+                            sellPrice &&
+                            !isNaN(Number(sellPrice)) &&
+                            sellMarket
+                          ) {
+                            handleMarkAsSold(
+                              item.id,
+                              Number(sellPrice),
+                              sellMarket,
+                            );
+                          }
+                        }}
+                      >
+                        Mark as Sold
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem>View Details</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
 
   // Calculate tab counts
   const inventoryCount = items.filter(
     (item) => item.status === "unsold",
   ).length;
   const historyCount = items.filter((item) => item.status === "sold").length;
+
+  const visibleColumns = settings.columns
+    .filter((col) => col.visible)
+    .sort((a, b) => a.order - b.order);
+
+  const markets = ["Lis-Skins", "Market.CSGO", "Steam Market"];
 
   return (
     <Card>
@@ -559,12 +802,13 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                       {marketFilters.length > 0 && `(${marketFilters.length})`}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent>
+                  <DropdownMenuContent className="w-56">
                     <DropdownMenuLabel>Select Markets</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
                     {markets.map((market) => (
                       <DropdownMenuItem
                         key={market}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 cursor-pointer"
                         onSelect={(e) => e.preventDefault()}
                       >
                         <Checkbox
@@ -573,11 +817,15 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                             handleMarketFilterChange(market, checked as boolean)
                           }
                         />
-                        {market}
+                        <span className="flex-1">{market}</span>
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setMarketFilters([])}>
+                    <DropdownMenuItem
+                      onClick={clearAllMarkets}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                    >
+                      <X className="h-3 w-3 mr-2" />
                       Clear All
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -596,225 +844,18 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     ? "You don't have any items in your inventory yet."
                     : "No items match your current filters."}
                 </p>
+                {marketFilters.length > 0 && (
+                  <Button
+                    variant="link"
+                    onClick={clearAllMarkets}
+                    className="mt-2"
+                  >
+                    Clear market filters
+                  </Button>
+                )}
               </div>
             ) : (
-              <div className="overflow-x-auto border rounded-lg">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      {visibleColumns.map((column) => (
-                        <TableHead
-                          key={column.id}
-                          className="hover:bg-muted/50 relative group select-none"
-                          style={{ width: column.width }}
-                          draggable
-                          onDragStart={(e) =>
-                            handleColumnDragStart(e, column.id)
-                          }
-                          onDragOver={handleColumnDragOver}
-                          onDrop={(e) => handleColumnDrop(e, column.id)}
-                        >
-                          <div className="flex items-center gap-1 justify-between">
-                            <div
-                              className="flex items-center gap-1 cursor-pointer flex-1"
-                              onClick={() => {
-                                if (
-                                  column.id !== "stickersCharm" &&
-                                  column.id !== "marketLinks"
-                                ) {
-                                  handleSort(column.id as SortField);
-                                }
-                              }}
-                            >
-                              <GripVertical className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                              {column.label}
-                              {column.id !== "stickersCharm" &&
-                                column.id !== "marketLinks" && (
-                                  <ArrowUpDown className="h-3 w-3" />
-                                )}
-                            </div>
-
-                            {/* Resize handle */}
-                            <div
-                              className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-primary/30 opacity-0 group-hover:opacity-100 transition-all duration-200 border-r-2 border-transparent hover:border-primary/50"
-                              onMouseDown={(e) =>
-                                handleResizeStart(e, column.id)
-                              }
-                              onClick={(e) => e.stopPropagation()}
-                              title="Drag to resize column"
-                            />
-                          </div>
-                        </TableHead>
-                      ))}
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAndSortedItems.map((item) => (
-                      <TableRow key={item.id} className="hover:bg-muted/50">
-                        {visibleColumns.map((column) => (
-                          <TableCell
-                            key={column.id}
-                            style={{ width: column.width }}
-                            className={
-                              column.id === "stickersCharm" ? "align-top" : ""
-                            }
-                          >
-                            {column.id === "itemName" && (
-                              <div className="max-w-[250px]">
-                                <div
-                                  className="truncate font-medium cursor-pointer hover:text-primary"
-                                  title={item.itemName}
-                                  onClick={() =>
-                                    copyToClipboard(item.itemName, "Item name")
-                                  }
-                                >
-                                  {item.itemName}
-                                </div>
-                                {item.tags.length > 0 && (
-                                  <div className="flex gap-1 mt-1">
-                                    {item.tags.slice(0, 2).map((tag) => (
-                                      <Badge
-                                        key={tag}
-                                        variant="outline"
-                                        className="text-xs whitespace-nowrap"
-                                      >
-                                        {tag}
-                                      </Badge>
-                                    ))}
-                                    {item.tags.length > 2 && (
-                                      <Badge
-                                        variant="outline"
-                                        className="text-xs whitespace-nowrap"
-                                      >
-                                        +{item.tags.length - 2}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                            {column.id === "buyPrice" && (
-                              <span className="font-medium whitespace-nowrap">
-                                {formatCurrency(item.buyPrice)}
-                              </span>
-                            )}
-                            {column.id === "buyDate" && (
-                              <span className="whitespace-nowrap">
-                                {formatDate(item.buyDate)}
-                              </span>
-                            )}
-                            {column.id === "market" && (
-                              <Badge
-                                variant="outline"
-                                className="whitespace-nowrap"
-                              >
-                                {item.market}
-                              </Badge>
-                            )}
-                            {column.id === "assetId" && (
-                              <code className="text-xs bg-muted px-2 py-1 rounded font-mono whitespace-nowrap">
-                                {item.assetId}
-                              </code>
-                            )}
-                            {column.id === "status" &&
-                              getStatusBadge(item.status)}
-                            {column.id === "sellInfo" && (
-                              <div className="whitespace-nowrap">
-                                {item.status === "sold" ? (
-                                  <div>
-                                    <div className="font-medium">
-                                      {formatCurrency(item.sellPrice!)}
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">
-                                      {formatDate(item.sellDate!)}
-                                    </div>
-                                    {item.sellMarket && (
-                                      <Badge
-                                        variant="outline"
-                                        className="text-xs mt-1 whitespace-nowrap"
-                                      >
-                                        {item.sellMarket}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className="text-muted-foreground">
-                                    —
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                            {column.id === "profit" && getProfitDisplay(item)}
-                            {column.id === "stickersCharm" &&
-                              getStickersAndCharmDisplay(item)}
-                            {column.id === "marketLinks" &&
-                              getMarketLinksDisplay(item)}
-                          </TableCell>
-                        ))}
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  copyToClipboard(item.assetId, "Asset ID")
-                                }
-                                className="gap-2"
-                              >
-                                <Copy className="h-3 w-3" />
-                                Copy Asset ID
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  copyToClipboard(item.itemName, "Item name")
-                                }
-                                className="gap-2"
-                              >
-                                <Copy className="h-3 w-3" />
-                                Copy Item Name
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              {item.status === "unsold" && (
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    const sellPrice = prompt(
-                                      "Enter sell price (USD):",
-                                    );
-                                    const sellMarket = prompt(
-                                      "Enter sell market (Lis-Skins, Market.CSGO, Steam Market):",
-                                    );
-                                    if (
-                                      sellPrice &&
-                                      !isNaN(Number(sellPrice)) &&
-                                      sellMarket
-                                    ) {
-                                      handleMarkAsSold(
-                                        item.id,
-                                        Number(sellPrice),
-                                        sellMarket,
-                                      );
-                                    }
-                                  }}
-                                >
-                                  Mark as Sold
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem>View Details</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              renderTable()
             )}
           </TabsContent>
 
@@ -852,12 +893,13 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                       {marketFilters.length > 0 && `(${marketFilters.length})`}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent>
+                  <DropdownMenuContent className="w-56">
                     <DropdownMenuLabel>Select Markets</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
                     {markets.map((market) => (
                       <DropdownMenuItem
                         key={market}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 cursor-pointer"
                         onSelect={(e) => e.preventDefault()}
                       >
                         <Checkbox
@@ -866,15 +908,85 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                             handleMarketFilterChange(market, checked as boolean)
                           }
                         />
-                        {market}
+                        <span className="flex-1">{market}</span>
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setMarketFilters([])}>
+                    <DropdownMenuItem
+                      onClick={clearAllMarkets}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                    >
+                      <X className="h-3 w-3 mr-2" />
                       Clear All
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+
+                <Popover
+                  open={isDatePickerOpen}
+                  onOpenChange={setIsDatePickerOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      <CalendarIcon className="h-4 w-4" />
+                      {dateRange.from || dateRange.to ? (
+                        <>
+                          {dateRange.from
+                            ? format(dateRange.from, "MMM dd")
+                            : "Start"}{" "}
+                          -{" "}
+                          {dateRange.to
+                            ? format(dateRange.to, "MMM dd")
+                            : "End"}
+                        </>
+                      ) : (
+                        "All Time"
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <div className="p-3 border-b">
+                      <h4 className="font-medium text-sm">
+                        Filter by sell date
+                      </h4>
+                    </div>
+                    <Calendar
+                      mode="range"
+                      selected={{
+                        from: dateRange.from,
+                        to: dateRange.to,
+                      }}
+                      onSelect={(range) => {
+                        setDateRange({
+                          from: range?.from,
+                          to: range?.to,
+                        });
+                        if (range?.from && range?.to) {
+                          setIsDatePickerOpen(false);
+                        }
+                      }}
+                      numberOfMonths={2}
+                      className="rounded-md"
+                    />
+                    <div className="p-3 border-t flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={clearDateRange}
+                        className="flex-1"
+                      >
+                        Clear
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => setIsDatePickerOpen(false)}
+                        className="flex-1"
+                      >
+                        Done
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
@@ -889,225 +1001,21 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     ? "You haven't sold any items yet."
                     : "No sold items match your current filters."}
                 </p>
+                <div className="flex gap-2 justify-center mt-4">
+                  {marketFilters.length > 0 && (
+                    <Button variant="link" onClick={clearAllMarkets}>
+                      Clear market filters
+                    </Button>
+                  )}
+                  {(dateRange.from || dateRange.to) && (
+                    <Button variant="link" onClick={clearDateRange}>
+                      Clear date range
+                    </Button>
+                  )}
+                </div>
               </div>
             ) : (
-              <div className="overflow-x-auto border rounded-lg">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      {visibleColumns.map((column) => (
-                        <TableHead
-                          key={column.id}
-                          className="hover:bg-muted/50 relative group select-none"
-                          style={{ width: column.width }}
-                          draggable
-                          onDragStart={(e) =>
-                            handleColumnDragStart(e, column.id)
-                          }
-                          onDragOver={handleColumnDragOver}
-                          onDrop={(e) => handleColumnDrop(e, column.id)}
-                        >
-                          <div className="flex items-center gap-1 justify-between">
-                            <div
-                              className="flex items-center gap-1 cursor-pointer flex-1"
-                              onClick={() => {
-                                if (
-                                  column.id !== "stickersCharm" &&
-                                  column.id !== "marketLinks"
-                                ) {
-                                  handleSort(column.id as SortField);
-                                }
-                              }}
-                            >
-                              <GripVertical className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                              {column.label}
-                              {column.id !== "stickersCharm" &&
-                                column.id !== "marketLinks" && (
-                                  <ArrowUpDown className="h-3 w-3" />
-                                )}
-                            </div>
-
-                            {/* Resize handle */}
-                            <div
-                              className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-primary/30 opacity-0 group-hover:opacity-100 transition-all duration-200 border-r-2 border-transparent hover:border-primary/50"
-                              onMouseDown={(e) =>
-                                handleResizeStart(e, column.id)
-                              }
-                              onClick={(e) => e.stopPropagation()}
-                              title="Drag to resize column"
-                            />
-                          </div>
-                        </TableHead>
-                      ))}
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAndSortedItems.map((item) => (
-                      <TableRow key={item.id} className="hover:bg-muted/50">
-                        {visibleColumns.map((column) => (
-                          <TableCell
-                            key={column.id}
-                            style={{ width: column.width }}
-                            className={
-                              column.id === "stickersCharm" ? "align-top" : ""
-                            }
-                          >
-                            {column.id === "itemName" && (
-                              <div className="max-w-[250px]">
-                                <div
-                                  className="truncate font-medium cursor-pointer hover:text-primary"
-                                  title={item.itemName}
-                                  onClick={() =>
-                                    copyToClipboard(item.itemName, "Item name")
-                                  }
-                                >
-                                  {item.itemName}
-                                </div>
-                                {item.tags.length > 0 && (
-                                  <div className="flex gap-1 mt-1">
-                                    {item.tags.slice(0, 2).map((tag) => (
-                                      <Badge
-                                        key={tag}
-                                        variant="outline"
-                                        className="text-xs whitespace-nowrap"
-                                      >
-                                        {tag}
-                                      </Badge>
-                                    ))}
-                                    {item.tags.length > 2 && (
-                                      <Badge
-                                        variant="outline"
-                                        className="text-xs whitespace-nowrap"
-                                      >
-                                        +{item.tags.length - 2}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                            {column.id === "buyPrice" && (
-                              <span className="font-medium whitespace-nowrap">
-                                {formatCurrency(item.buyPrice)}
-                              </span>
-                            )}
-                            {column.id === "buyDate" && (
-                              <span className="whitespace-nowrap">
-                                {formatDate(item.buyDate)}
-                              </span>
-                            )}
-                            {column.id === "market" && (
-                              <Badge
-                                variant="outline"
-                                className="whitespace-nowrap"
-                              >
-                                {item.market}
-                              </Badge>
-                            )}
-                            {column.id === "assetId" && (
-                              <code className="text-xs bg-muted px-2 py-1 rounded font-mono whitespace-nowrap">
-                                {item.assetId}
-                              </code>
-                            )}
-                            {column.id === "status" &&
-                              getStatusBadge(item.status)}
-                            {column.id === "sellInfo" && (
-                              <div className="whitespace-nowrap">
-                                {item.status === "sold" ? (
-                                  <div>
-                                    <div className="font-medium">
-                                      {formatCurrency(item.sellPrice!)}
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">
-                                      {formatDate(item.sellDate!)}
-                                    </div>
-                                    {item.sellMarket && (
-                                      <Badge
-                                        variant="outline"
-                                        className="text-xs mt-1 whitespace-nowrap"
-                                      >
-                                        {item.sellMarket}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className="text-muted-foreground">
-                                    —
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                            {column.id === "profit" && getProfitDisplay(item)}
-                            {column.id === "stickersCharm" &&
-                              getStickersAndCharmDisplay(item)}
-                            {column.id === "marketLinks" &&
-                              getMarketLinksDisplay(item)}
-                          </TableCell>
-                        ))}
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  copyToClipboard(item.assetId, "Asset ID")
-                                }
-                                className="gap-2"
-                              >
-                                <Copy className="h-3 w-3" />
-                                Copy Asset ID
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  copyToClipboard(item.itemName, "Item name")
-                                }
-                                className="gap-2"
-                              >
-                                <Copy className="h-3 w-3" />
-                                Copy Item Name
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              {item.status === "unsold" && (
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    const sellPrice = prompt(
-                                      "Enter sell price (USD):",
-                                    );
-                                    const sellMarket = prompt(
-                                      "Enter sell market (Lis-Skins, Market.CSGO, Steam Market):",
-                                    );
-                                    if (
-                                      sellPrice &&
-                                      !isNaN(Number(sellPrice)) &&
-                                      sellMarket
-                                    ) {
-                                      handleMarkAsSold(
-                                        item.id,
-                                        Number(sellPrice),
-                                        sellMarket,
-                                      );
-                                    }
-                                  }}
-                                >
-                                  Mark as Sold
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem>View Details</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              renderTable()
             )}
           </TabsContent>
         </Tabs>
