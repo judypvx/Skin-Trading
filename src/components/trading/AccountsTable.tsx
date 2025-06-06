@@ -280,22 +280,37 @@ const AccountsTable = ({ accounts, onUpdateAccount }: AccountsTableProps) => {
             </div>
 
             <div className="flex gap-2">
-              <Select
-                value={inventoryValueMarket}
-                onValueChange={(value) =>
-                  setInventoryValueMarket(
-                    value as "Market.CSGO" | "Steam Market",
-                  )
-                }
-              >
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Market.CSGO">Market.CSGO</SelectItem>
-                  <SelectItem value="Steam Market">Steam Market</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-1">
+                <Select
+                  value={inventoryValueMarket}
+                  onValueChange={(value) =>
+                    setInventoryValueMarket(
+                      value as "Market.CSGO" | "Steam Market",
+                    )
+                  }
+                >
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Market.CSGO">Market.CSGO</SelectItem>
+                    <SelectItem value="Steam Market">Steam Market</SelectItem>
+                  </SelectContent>
+                </Select>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        Select which marketplace to use for calculating
+                        inventory values
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[130px]">
                   <Filter className="h-4 w-4 mr-2" />
