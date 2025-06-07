@@ -123,7 +123,7 @@ const Accounts = () => {
       <NavigationTabs />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="w-full mx-auto px-4 py-6" style={{ maxWidth: "1584px" }}>
         {/* Welcome Section */}
         <div className="mb-6">
           <Card className="bg-gradient-to-r from-blue-50 to-background border-blue-200 dark:from-blue-950 dark:border-blue-800">
