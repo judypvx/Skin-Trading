@@ -740,7 +740,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                       {visibleColumns.map((column) => (
                         <TableCell key={column.id} className="py-4">
                           {column.id === "itemName" && (
-                            <div className="flex items-center gap-2 max-w-[300px]">
+                            <div className="flex items-center gap-2 w-full">
                               <div className="flex-shrink-0">
                                 <img
                                   src={`https://community.cloudflare.steamstatic.com/economy/image/${item.assetId || "placeholder"}/96fx96f`}
@@ -753,8 +753,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                   }}
                                 />
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="truncate font-medium">
+                              <div className="flex-1 min-w-0 pr-2">
+                                <div className="font-medium break-words">
                                   {item.itemName}
                                 </div>
                               </div>
