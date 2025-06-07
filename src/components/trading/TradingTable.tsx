@@ -1166,16 +1166,10 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                   } = extractItemNameParts(item.itemName);
                                   return (
                                     <div>
-                                      <div className="flex items-center gap-2 flex-wrap">
+                                      <div className="flex items-center">
                                         {isStatTrak && (
                                           <Badge
-                                            className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 text-xs font-bold px-2 py-0.5 shadow-lg"
-                                            style={{
-                                              background:
-                                                "linear-gradient(45deg, #ff6b35, #f7931e)",
-                                              boxShadow:
-                                                "0 0 8px rgba(255, 107, 53, 0.4)",
-                                            }}
+                                            className="bg-orange-500 text-white border-0 text-xs font-bold px-1.5 py-0.5 mr-1.5 rounded"
                                           >
                                             ST™
                                           </Badge>
@@ -1190,45 +1184,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                         </div>
                                       )}
                                     </div>
-                                  );
-                                })()}
-                              </div>
-                            </div>
-                          )}
-                          {column.id === "buyPrice" && (
-                            <div className="flex items-center justify-center">
-                              <span className="font-medium">
-                                {formatCurrency(item.buyPrice)}
-                              </span>
-                            </div>
-                          )}
-                          {column.id === "buyDate" && (
-                            <div className="flex items-center justify-center">
-                              <span className="text-sm font-medium whitespace-nowrap">
-                                {formatDate(item.buyDate)}
-                              </span>
-                            </div>
-                          )}
-                          {column.id === "market" && (
-                            <div className="flex items-center justify-center">
-                              <Badge
-                                variant="outline"
-                                className="whitespace-nowrap"
-                              >
-                                {item.market}
-                              </Badge>
-                            </div>
-                          )}
-                          {column.id === "status" && getStatusBadge(item)}
-                          {column.id === "sellInfo" && getSellInfoDisplay(item)}
-                          {column.id === "profit" && getProfitDisplay(item)}
-                          {column.id === "stickersCharm" &&
-                            getStickersAndCharmDisplay(item)}
-                          {column.id === "marketLinks" && (
-                            <div className="flex items-center justify-center gap-1">
-                              {item.marketLinks.lisSkins && (
-                                <TooltipProvider>
-                                  <Tooltip>
                                     <TooltipTrigger>
                                       <div className="w-6 h-6 bg-blue-100 border border-blue-300 rounded flex items-center justify-center cursor-pointer hover:bg-blue-200">
                                         <span className="text-xs font-bold">
