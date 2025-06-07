@@ -751,7 +751,9 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                         </div>
                       </TableHead>
                     ))}
-                    <TableHead className="text-center">Actions</TableHead>
+                    <TableHead className="text-center w-[80px]">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
