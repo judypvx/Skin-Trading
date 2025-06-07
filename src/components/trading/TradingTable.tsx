@@ -801,9 +801,22 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                 />
                               </div>
                               <div className="flex-1 min-w-0 pr-2">
-                                <div className="font-medium break-words">
-                                  {item.itemName}
-                                </div>
+                                {(() => {
+                                  const { nameWithoutWear, wearCondition } =
+                                    extractWearCondition(item.itemName);
+                                  return (
+                                    <div>
+                                      <div className="font-medium break-words">
+                                        {nameWithoutWear}
+                                      </div>
+                                      {wearCondition && (
+                                        <div className="text-xs text-muted-foreground mt-0.5">
+                                          {wearCondition}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                               </div>
                             </div>
                           )}
