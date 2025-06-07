@@ -775,12 +775,14 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                             </div>
                           )}
                           {column.id === "market" && (
-                            <Badge
-                              variant="outline"
-                              className="whitespace-nowrap"
-                            >
-                              {item.market}
-                            </Badge>
+                            <div className="flex items-center justify-center">
+                              <Badge
+                                variant="outline"
+                                className="whitespace-nowrap"
+                              >
+                                {item.market}
+                              </Badge>
+                            </div>
                           )}
                           {column.id === "status" && getStatusBadge(item)}
                           {column.id === "sellInfo" && getSellInfoDisplay(item)}
