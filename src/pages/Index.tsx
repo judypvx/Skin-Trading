@@ -284,7 +284,7 @@ const Index = () => {
           </div>
         </div>
         {/* Trading Table */}
-        <TradingTable items={items} onUpdateItem={handleUpdateItem} />
+        <TradingTable items={filteredItems} onUpdateItem={handleUpdateItem} />
         {/* Footer */}
         <footer className="mt-12 pt-6 border-t text-center text-sm text-muted-foreground">
           <p>
