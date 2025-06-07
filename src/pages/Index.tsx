@@ -38,6 +38,7 @@ const Index = () => {
   );
   const [selectedTimePeriod, setSelectedTimePeriod] =
     useState<string>("all-time");
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
 
   // Filter items by selected time period
   const getFilteredItemsByTimePeriod = (timePeriod: string) => {
