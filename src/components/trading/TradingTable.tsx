@@ -417,7 +417,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
       <div className="flex items-center justify-center gap-1 overflow-hidden">
         {item.charm && (
           <div className="w-6 h-6 bg-purple-100 border border-purple-300 rounded flex items-center justify-center">
-            <span className="text-xs">��</span>
+            <span className="text-xs">💎</span>
           </div>
         )}
         {item.stickers.slice(0, 4).map((sticker, index) => (
@@ -703,8 +703,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
               </div>
             </div>
 
-            <div className="overflow-x-auto border rounded-lg">
-              <Table>
+            <div className="border rounded-lg w-full">
+              <Table className="w-full table-fixed">
                 <TableHeader>
                   <TableRow>
                     {visibleColumns.map((column) => (
