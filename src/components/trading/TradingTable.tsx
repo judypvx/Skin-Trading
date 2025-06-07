@@ -983,57 +983,6 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" className="gap-2">
-                        <Users className="h-4 w-4" />
-                        Accounts{" "}
-                        {accountFilters.length > 0 &&
-                          `(${accountFilters.length})`}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
-                      <DropdownMenuLabel>Filter by Account</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {mockSteamAccountsBasic
-                        .filter((account) => account.id !== "all")
-                        .map((account) => (
-                          <DropdownMenuItem
-                            key={account.id}
-                            className="flex items-center space-x-2"
-                            onClick={(e) => e.preventDefault()}
-                          >
-                            <Checkbox
-                              checked={accountFilters.includes(account.id)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setAccountFilters([
-                                    ...accountFilters,
-                                    account.id,
-                                  ]);
-                                } else {
-                                  setAccountFilters(
-                                    accountFilters.filter(
-                                      (f) => f !== account.id,
-                                    ),
-                                  );
-                                }
-                              }}
-                            />
-                            <span>{account.nickname}</span>
-                          </DropdownMenuItem>
-                        ))}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={clearAllAccounts}
-                        className="text-red-600"
-                      >
-                        <X className="h-3 w-3 mr-2" />
-                        Clear All
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="gap-2">
                         <Filter className="h-4 w-4" />
                         Markets{" "}
                         {marketFilters.length > 0 &&
