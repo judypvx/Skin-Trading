@@ -1063,7 +1063,27 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                     {visibleColumns.map((column) => (
                       <TableHead
                         key={column.id}
-                        className="hover:bg-muted/50 cursor-pointer text-center"
+                        className={`hover:bg-muted/50 cursor-pointer text-center ${
+                          column.id === "itemName"
+                            ? "w-1/4 min-w-[280px]"
+                            : column.id === "buyPrice"
+                              ? "w-[120px]"
+                              : column.id === "buyDate"
+                                ? "w-[120px]"
+                                : column.id === "market"
+                                  ? "w-[140px]"
+                                  : column.id === "status"
+                                    ? "w-[160px]"
+                                    : column.id === "sellInfo"
+                                      ? "w-[180px]"
+                                      : column.id === "profit"
+                                        ? "w-[160px]"
+                                        : column.id === "stickersCharm"
+                                          ? "w-[140px]"
+                                          : column.id === "marketLinks"
+                                            ? "w-[120px]"
+                                            : "w-auto"
+                        }`}
                         onClick={() => {
                           if (
                             column.id !== "stickersCharm" &&
@@ -1084,7 +1104,9 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                         </div>
                       </TableHead>
                     ))}
-                    <TableHead className="text-center">Actions</TableHead>
+                    <TableHead className="text-center w-[80px]">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
