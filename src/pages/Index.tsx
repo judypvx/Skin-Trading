@@ -241,12 +241,18 @@ const Index = () => {
 
         {/* Account Selector */}
         <div className="mt-6">
-          <AccountSelector />
+          <AccountSelector
+            selectedAccounts={selectedAccounts}
+            onAccountsChange={setSelectedAccounts}
+          />
         </div>
 
         {/* Portfolio Chart */}
         <div className="mt-6">
-          <PortfolioChart items={items} timePeriod={selectedTimePeriod} />
+          <PortfolioChart
+            items={filteredItems}
+            timePeriod={selectedTimePeriod}
+          />
         </div>
 
         <Separator className="my-6" />
