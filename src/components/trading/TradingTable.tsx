@@ -1192,8 +1192,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                               </div>
                               <div className="flex-1 min-w-0 pr-2">
                                 {(() => {
-                                  const { nameWithoutWear, wearCondition } =
-                                    extractWearCondition(item.itemName);
+                                  const { nameWithoutPrefixes, wearCondition, isStatTrak } =
+                                    extractItemNameParts(item.itemName);
                                   return (
                                     <div>
                                       <div className="font-medium break-words">
