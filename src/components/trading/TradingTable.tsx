@@ -815,9 +815,22 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                     <div>
                                       <div className="flex items-center">
                                         {isStatTrak && (
-                                          <Badge className="bg-orange-500 text-white border-0 text-xs font-bold px-1.5 py-0.5 mr-1.5 rounded">
+                                          <span
+                                            className="text-white border-0 font-semibold mr-1.5"
+                                            style={{
+                                              fontSize: "10px",
+                                              padding: "2px 6px",
+                                              borderRadius: "6px",
+                                              background:
+                                                "linear-gradient(135deg, #ff944d 0%, #ff6a00 100%)",
+                                              display: "inline-flex",
+                                              alignItems: "center",
+                                              justifyContent: "center",
+                                              marginRight: "6px",
+                                            }}
+                                          >
                                             ST™
-                                          </Badge>
+                                          </span>
                                         )}
                                         <span className="font-medium break-words">
                                           {nameWithoutPrefixes}
