@@ -761,9 +761,11 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                             </div>
                           )}
                           {column.id === "buyPrice" && (
-                            <span className="font-medium">
-                              {formatCurrency(item.buyPrice)}
-                            </span>
+                            <div className="flex items-center justify-center">
+                              <span className="font-medium">
+                                {formatCurrency(item.buyPrice)}
+                              </span>
+                            </div>
                           )}
                           {column.id === "buyDate" && (
                             <div className="flex items-center justify-center">
