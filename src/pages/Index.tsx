@@ -40,9 +40,19 @@ const Index = () => {
     useState<string>("all-time");
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
 
-  // Filter items by selected time period
-  const getFilteredItemsByTimePeriod = (timePeriod: string) => {
-    if (timePeriod === "all-time") return items;
+  // Filter items by selected time period and accounts
+  const getFilteredItems = (timePeriod: string, accountIds: string[]) => {
+    let filteredItems = items;
+
+    // Filter by accounts first
+    if (accountIds.length > 0) {
+      filteredItems = filteredItems.filter((item) =>
+        accountIds.includes(item.accountId),
+      );
+    }
+
+    // Then filter by time period
+    if (timePeriod === "all-time") return filteredItems;
 
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -61,10 +71,10 @@ const Index = () => {
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
         break;
       default:
-        return items;
+        return filteredItems;
     }
 
-    return items.filter((item) => {
+    return filteredItems.filter((item) => {
       // For sold items, use sell date; for unsold items, use buy date
       const itemDate =
         item.status === "sold" && item.sellDate
