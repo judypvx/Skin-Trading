@@ -52,62 +52,50 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { toast } from "sonner";
 
 interface TradingTableProps {
   items: TradingItem[];
-  onUpdateItem: (id: string, updates: Partial<TradingItem>) => void;
+  onUpdateItem?: (id: string, updates: Partial<TradingItem>) => void;
 }
 
-type SortField = keyof TradingItem;
+type SortField =
+  | "itemName"
+  | "buyPrice"
+  | "buyDate"
+  | "market"
+  | "status"
+  | "sellPrice"
+  | "sellDate"
+  | "profit";
+
 type SortDirection = "asc" | "desc";
 
+interface DateRange {
+  startDate: string | null;
+  endDate: string | null;
+  preset: string;
+}
+
 const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [marketFilters, setMarketFilters] = useState<string[]>([]);
-  const [accountFilters, setAccountFilters] = useState<string[]>([]);
-  const [sortField, setSortField] = useState<SortField>("buyDate");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const [settings, setSettings] = useState<TradingTableSettings>(() => {
-    const loadedSettings = loadSettings();
-    // Ensure Asset ID and Image columns are completely removed
-    loadedSettings.columns = loadedSettings.columns.filter(
-      (col) => col.id !== "assetId" && col.id !== "itemImage",
-    );
-    return loadedSettings;
-  });
   const [activeTab, setActiveTab] = useState<"inventory" | "history">(
     "inventory",
   );
-  const [dateRange, setDateRange] = useState<{
-    startDate: string | null;
-    endDate: string | null;
-    preset: string;
-  }>({
+  const [sortField, setSortField] = useState<SortField>("buyDate");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [marketFilters, setMarketFilters] = useState<string[]>([]);
+  const [accountFilters, setAccountFilters] = useState<string[]>([]);
+  const [settings, setSettings] = useState<TradingTableSettings>(() => {
+    const loaded = loadSettings();
+    return loaded;
+  });
+
+  const [dateRange, setDateRange] = useState<DateRange>({
     startDate: null,
     endDate: null,
     preset: "all-time",
   });
 
-  // Force clear Asset ID and Image columns from localStorage on mount
-  useEffect(() => {
-    const currentSettings = loadSettings();
-    const filteredColumns = currentSettings.columns.filter(
-      (col) => col.id !== "assetId" && col.id !== "itemImage",
-    );
-    if (filteredColumns.length !== currentSettings.columns.length) {
-      const newSettings = { ...currentSettings, columns: filteredColumns };
-      saveSettings(newSettings);
-      setSettings(newSettings);
-    }
-  }, []);
-
-  // Save settings whenever they change
-  useEffect(() => {
-    saveSettings(settings);
-  }, [settings]);
-
-  // Date preset calculations
   const getDatePresetRange = (preset: string) => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -178,14 +166,14 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
       "Minimal Wear",
       "Field-Tested",
       "Well-Worn",
-      "Battle-Scarred"
+      "Battle-Scarred",
     ];
 
     let wearCondition = null;
     for (const condition of wearConditions) {
       if (processedName.includes(`(${condition})`)) {
         wearCondition = condition;
-        processedName = processedName.replace(` (${condition})`, '');
+        processedName = processedName.replace(` (${condition})`, "");
         break;
       }
     }
@@ -193,9 +181,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     return {
       nameWithoutPrefixes: processedName,
       wearCondition,
-      isStatTrak
+      isStatTrak,
     };
-  };
   };
 
   const clearAllMarkets = () => {
@@ -212,104 +199,61 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   };
 
   const selectAllAccounts = () => {
-    const allAccountIds = mockSteamAccountsBasic
-      .filter((account) => account.id !== "all")
-      .map((account) => account.id);
-    setAccountFilters(allAccountIds);
+    const allAccounts = Array.from(
+      new Set(items.map((item) => item.accountId)),
+    );
+    setAccountFilters(allAccounts);
   };
 
   const getStatusBadge = (item: TradingItem) => {
     const getDaysLeft = (dateString: string) => {
       const targetDate = new Date(dateString);
-      const now = new Date();
-      const diffTime = targetDate.getTime() - now.getTime();
+      const today = new Date();
+      const diffTime = targetDate.getTime() - today.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return Math.max(0, diffDays);
+      return diffDays;
     };
 
     switch (item.status) {
       case "sold":
         return (
-          <div className="flex justify-center">
-            <Badge
-              variant="default"
-              className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 whitespace-nowrap"
-            >
+          <div className="flex items-center justify-center">
+            <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
               Sold
             </Badge>
           </div>
         );
-
-      case "waiting_unlock":
-        return (
-          <div className="flex justify-center">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Badge
-                    variant="secondary"
-                    className="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 whitespace-nowrap flex items-center gap-1"
-                  >
-                    🕒 Waiting for Unlock
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    This item was purchased on an external bot and is pending
-                    delivery to your Steam inventory
-                  </p>
-                  {item.unlock_at && (
-                    <p className="text-xs text-muted-foreground">
-                      Expected delivery:{" "}
-                      {new Date(item.unlock_at).toLocaleDateString()}
-                    </p>
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        );
-
       case "trade_ban":
-        const daysLeft = item.trade_ban_until
+        const tradeBanDaysLeft = item.trade_ban_until
           ? getDaysLeft(item.trade_ban_until)
-          : 0;
+          : null;
         return (
-          <div className="flex justify-center">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Badge
-                    variant="destructive"
-                    className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 whitespace-nowrap flex items-center gap-1"
-                  >
-                    🔒 Trade Ban - {daysLeft}d Left
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    This item is in your Steam inventory but still under trade
-                    cooldown
-                  </p>
-                  {item.trade_ban_until && (
-                    <p className="text-xs text-muted-foreground">
-                      Will be tradable on:{" "}
-                      {new Date(item.trade_ban_until).toLocaleDateString()}
-                    </p>
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <div className="flex items-center justify-center">
+            <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+              {tradeBanDaysLeft !== null && tradeBanDaysLeft > 0
+                ? `Trade Ban - ${tradeBanDaysLeft}d Left`
+                : "Trade Ban"}
+            </Badge>
           </div>
         );
-
+      case "waiting_unlock":
+        const unlockDaysLeft = item.unlock_at
+          ? getDaysLeft(item.unlock_at)
+          : null;
+        return (
+          <div className="flex items-center justify-center">
+            <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
+              {unlockDaysLeft !== null && unlockDaysLeft > 0
+                ? `Waiting for Unlock - ${unlockDaysLeft}d`
+                : "Waiting for Unlock"}
+            </Badge>
+          </div>
+        );
+      case "unsold":
       default:
         return (
-          <div className="flex justify-center">
-            <Badge
-              variant="secondary"
-              className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 whitespace-nowrap"
-            >
+          <div className="flex items-center justify-center">
+            <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
               Unlocked
             </Badge>
           </div>
@@ -318,99 +262,109 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   };
 
   const getSellInfoDisplay = (item: TradingItem) => {
-    if (item.status === "sold") {
+    if (item.status === "sold" && item.sellPrice && item.sellDate) {
       return (
-        <div className="flex items-center justify-center">
-          <div className="text-center space-y-1">
-            <div className="flex justify-center">
-              <Badge variant="outline" className="text-xs whitespace-nowrap">
-                {item.sellMarket}
-              </Badge>
+        <div className="flex flex-col items-center justify-center">
+          <div className="flex items-center justify-center w-full mb-1">
+            <Badge
+              variant="outline"
+              className="text-xs text-center whitespace-nowrap"
+            >
+              {item.sellMarket || "Unknown Market"}
+            </Badge>
+          </div>
+          <div className="text-center">
+            <div className="font-semibold text-base">
+              {formatCurrency(item.sellPrice)}
             </div>
-            <div className="font-medium">{formatCurrency(item.sellPrice!)}</div>
             <div className="text-xs text-muted-foreground whitespace-nowrap">
-              {formatDate(item.sellDate!)}
+              {formatDate(item.sellDate)}
             </div>
           </div>
         </div>
       );
     } else {
-      if (item.targetSellMarket && item.currentMarketPrice) {
-        return (
-          <div className="flex items-center justify-center">
-            <div className="text-center space-y-1">
-              <div className="flex justify-center">
-                <Badge variant="outline" className="text-xs whitespace-nowrap">
-                  {item.targetSellMarket}
-                </Badge>
-              </div>
-              <div className="font-medium text-blue-600 dark:text-blue-400">
-                {formatCurrency(item.currentMarketPrice)}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Current lowest
-              </div>
+      // For unsold items, show current market price or target market
+      const currentPrice = item.currentMarketPrice;
+      const targetMarket =
+        item.targetSellMarket || item.sellMarket || "Steam Market";
+
+      return (
+        <div className="flex flex-col items-center justify-center">
+          <div className="flex items-center justify-center w-full mb-1">
+            <Badge
+              variant="outline"
+              className="text-xs text-center whitespace-nowrap"
+            >
+              {targetMarket}
+            </Badge>
+          </div>
+          <div className="text-center">
+            <div className="font-semibold text-base">
+              {currentPrice ? formatCurrency(currentPrice) : "—"}
+            </div>
+            <div className="text-xs text-muted-foreground whitespace-nowrap">
+              Current lowest
             </div>
           </div>
-        );
-      } else {
-        return (
-          <div className="flex items-center justify-center">
-            <span className="text-muted-foreground">—</span>
-          </div>
-        );
-      }
+        </div>
+      );
     }
   };
 
   const getProfitDisplay = (item: TradingItem) => {
     if (item.status === "sold") {
-      const isPositive = item.profit >= 0;
-      const Icon = isPositive ? TrendingUp : TrendingDown;
-      const colorClass = isPositive
+      const profit = item.profit;
+      const profitPercentage = item.profitPercentage;
+      const isProfit = profit > 0;
+
+      const Icon = isProfit ? TrendingUp : TrendingDown;
+      const colorClass = isProfit
         ? "text-green-600 dark:text-green-400"
         : "text-red-600 dark:text-red-400";
+      const bgColorClass = isProfit
+        ? "bg-green-100 dark:bg-green-900"
+        : "bg-red-100 dark:bg-red-900";
 
       return (
-        <div className="flex items-center justify-center">
-          <div className={`text-center ${colorClass}`}>
-            <div className="font-medium text-lg">
-              {formatCurrency(item.profit)}
-            </div>
-            <div className="flex items-center justify-center gap-1 whitespace-nowrap mt-1">
-              <Icon className="h-3 w-3" />
-              <span className="text-xs">Profit</span>
-            </div>
-            <div className="text-xs opacity-80 mt-0.5">
-              ({formatPercentage(item.profitPercentage)})
-            </div>
+        <div className="flex flex-col items-center justify-center">
+          <div className={`font-medium text-lg ${colorClass}`}>
+            {formatCurrency(profit)}
+          </div>
+          <div
+            className={`flex items-center justify-center gap-1 ${bgColorClass} rounded px-2 py-1 whitespace-nowrap mt-1`}
+          >
+            <Icon className="h-3 w-3" />
+            <span className="text-xs">{isProfit ? "Profit" : "Loss"}</span>
+          </div>
+          <div className="text-xs opacity-80 mt-0.5">
+            ({formatPercentage(profitPercentage)})
           </div>
         </div>
       );
     } else {
-      // Calculate potential profit percentage
+      // For unsold items, show potential profit
+      const potentialProfit = item.potentialProfit;
       const potentialProfitPercentage =
-        item.buyPrice > 0 ? (item.potentialProfit / item.buyPrice) * 100 : 0;
+        item.buyPrice > 0 ? (potentialProfit / item.buyPrice) * 100 : 0;
+      const isProfit = potentialProfit > 0;
 
-      const isPositive = item.potentialProfit >= 0;
-      const Icon = isPositive ? TrendingUp : TrendingDown;
-      const colorClass = isPositive
+      const Icon = isProfit ? TrendingUp : TrendingDown;
+      const colorClass = isProfit
         ? "text-green-600 dark:text-green-400"
         : "text-red-600 dark:text-red-400";
 
       return (
-        <div className="flex items-center justify-center">
-          <div className={`text-center ${colorClass}`}>
-            <div className="font-medium text-lg">
-              {formatCurrency(item.potentialProfit)}
-            </div>
-            <div className="flex items-center justify-center gap-1 whitespace-nowrap mt-1">
-              <Icon className="h-3 w-3" />
-              <span className="text-xs">Potential</span>
-            </div>
-            <div className="text-xs opacity-80 mt-0.5">
-              ({formatPercentage(potentialProfitPercentage)})
-            </div>
+        <div className="flex flex-col items-center justify-center">
+          <div className={`font-medium text-lg ${colorClass}`}>
+            {formatCurrency(potentialProfit)}
+          </div>
+          <div className="flex items-center justify-center gap-1 whitespace-nowrap mt-1">
+            <Icon className="h-3 w-3" />
+            <span className="text-xs">Potential</span>
+          </div>
+          <div className="text-xs opacity-80 mt-0.5">
+            ({formatPercentage(potentialProfitPercentage)})
           </div>
         </div>
       );
@@ -419,63 +373,75 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
   const getPotentialProfitDisplay = (item: TradingItem) => {
     if (item.status === "sold") {
-      return getProfitDisplay(item);
+      return <span className="text-muted-foreground">—</span>;
     }
 
+    const potentialProfit = item.potentialProfit;
     const potentialProfitPercentage =
-      item.buyPrice > 0 ? (item.potentialProfit / item.buyPrice) * 100 : 0;
+      item.buyPrice > 0 ? (potentialProfit / item.buyPrice) * 100 : 0;
+    const isProfit = potentialProfit > 0;
 
-    const isPositive = item.potentialProfit >= 0;
-    const Icon = isPositive ? TrendingUp : TrendingDown;
-    const colorClass = isPositive
+    const Icon = isProfit ? TrendingUp : TrendingDown;
+    const textColorClass = isProfit
       ? "text-green-600 dark:text-green-400"
       : "text-red-600 dark:text-red-400";
 
     return (
-      <div className="flex items-center justify-center">
-        <div className={`text-center ${colorClass}`}>
-          <div className="flex items-center justify-center gap-1 whitespace-nowrap">
-            <Icon className="h-3 w-3" />
-            <span className="text-xs">Potential:</span>
-            <span className="font-medium">
-              {formatCurrency(item.potentialProfit)}
-            </span>
-          </div>
-          <div className="text-xs opacity-80 mt-0.5">
-            ({formatPercentage(potentialProfitPercentage)})
-          </div>
+      <div className="flex items-center justify-center gap-2">
+        <div className={`flex items-center gap-1 ${textColorClass}`}>
+          <Icon className="h-4 w-4" />
+          <span className="font-medium">{formatCurrency(potentialProfit)}</span>
         </div>
+        <span className="text-sm text-muted-foreground">
+          ({formatPercentage(potentialProfitPercentage)})
+        </span>
       </div>
     );
   };
 
   const getStickersAndCharmDisplay = (item: TradingItem) => {
+    const hasStickers = item.stickers && item.stickers.length > 0;
+    const hasCharm = item.charm;
+
+    if (!hasStickers && !hasCharm) {
+      return (
+        <div className="flex items-center justify-center">
+          <span className="text-muted-foreground">—</span>
+        </div>
+      );
+    }
+
     return (
-      <div className="flex items-center justify-center gap-1 overflow-hidden">
-        {item.charm && (
-          <div className="w-6 h-6 bg-purple-100 border border-purple-300 rounded flex items-center justify-center">
-            <span className="text-xs">💎</span>
-          </div>
-        )}
-        {item.stickers.slice(0, 4).map((sticker, index) => (
-          <TooltipProvider key={index}>
+      <div className="flex items-center justify-center gap-1">
+        {hasStickers &&
+          item.stickers.slice(0, 4).map((sticker, index) => (
+            <TooltipProvider key={index}>
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className="w-6 h-6 bg-yellow-100 border border-yellow-300 rounded flex items-center justify-center">
+                    <Star className="h-3 w-3 text-yellow-600" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{sticker.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ))}
+        {hasCharm && (
+          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <div className="w-6 h-6 bg-orange-100 border border-orange-300 rounded flex items-center justify-center">
-                  <span className="text-xs">⭐</span>
+                <div className="w-6 h-6 bg-purple-100 border border-purple-300 rounded flex items-center justify-center">
+                  <span className="text-xs font-bold text-purple-600">C</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{sticker.name}</p>
-                {sticker.wear !== undefined && (
-                  <p className="text-xs text-muted-foreground">
-                    Wear: {sticker.wear}%
-                  </p>
-                )}
+                <p>{item.charm.name}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-        ))}
+        )}
       </div>
     );
   };
@@ -531,30 +497,39 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
   const filteredAndSortedItems = useMemo(() => {
     let filtered = items.filter((item) => {
+      // Tab filtering
+      if (activeTab === "inventory") {
+        return ["unsold", "waiting_unlock", "trade_ban"].includes(item.status);
+      } else {
+        return item.status === "sold";
+      }
+    });
+
+    // Search filtering
+    if (searchTerm) {
       const matchesSearch = item.itemName
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
+      filtered = filtered.filter((item) => matchesSearch);
+    }
 
-      // Tab-based filtering
-      const matchesTab =
-        activeTab === "inventory"
-          ? item.status === "unsold" ||
-            item.status === "waiting_unlock" ||
-            item.status === "trade_ban"
-          : item.status === "sold";
+    // Multi-select market filtering - if no markets selected, show all
+    if (marketFilters.length > 0) {
+      filtered = filtered.filter((item) => marketFilters.includes(item.market));
+    }
 
-      // Multi-select market filtering - if no markets selected, show all
-      const matchesMarket =
-        marketFilters.length === 0 || marketFilters.includes(item.market);
+    // Multi-select account filtering - if no accounts selected, show all
+    if (accountFilters.length > 0) {
+      filtered = filtered.filter((item) =>
+        accountFilters.includes(item.accountId),
+      );
+    }
 
-      // Multi-select account filtering - if no accounts selected, show all
-      const matchesAccount =
-        accountFilters.length === 0 || accountFilters.includes(item.accountId);
-
-      // Date range filtering (only for sell history tab)
-      let matchesDateRange = true;
-      if (activeTab === "history" && item.status === "sold" && item.sellDate) {
-        if (dateRange.startDate || dateRange.endDate) {
+    // Date range filtering (only for sell history tab)
+    if (activeTab === "history") {
+      if (dateRange.startDate || dateRange.endDate) {
+        filtered = filtered.filter((item) => {
+          if (!item.sellDate) return false;
           const sellDate = new Date(item.sellDate);
           const startDate = dateRange.startDate
             ? new Date(dateRange.startDate)
@@ -563,70 +538,78 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
             ? new Date(dateRange.endDate)
             : null;
 
-          // Set time to start/end of day for proper comparison
-          if (startDate) {
-            startDate.setHours(0, 0, 0, 0);
-          }
-          if (endDate) {
-            endDate.setHours(23, 59, 59, 999);
-          }
+          if (startDate && sellDate < startDate) return false;
+          if (endDate && sellDate > endDate) return false;
+          return true;
+        });
+      }
+    }
 
-          matchesDateRange =
-            (!startDate || sellDate >= startDate) &&
-            (!endDate || sellDate <= endDate);
-        }
+    // Sorting
+    const sorted = [...filtered].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case "itemName":
+          aValue = a.itemName.toLowerCase();
+          bValue = b.itemName.toLowerCase();
+          break;
+        case "buyPrice":
+          aValue = a.buyPrice;
+          bValue = b.buyPrice;
+          break;
+        case "buyDate":
+          aValue = new Date(a.buyDate);
+          bValue = new Date(b.buyDate);
+          break;
+        case "market":
+          aValue = a.market.toLowerCase();
+          bValue = b.market.toLowerCase();
+          break;
+        case "status":
+          aValue = a.status.toLowerCase();
+          bValue = b.status.toLowerCase();
+          break;
+        case "sellPrice":
+          aValue = a.sellPrice || 0;
+          bValue = b.sellPrice || 0;
+          break;
+        case "sellDate":
+          aValue = a.sellDate ? new Date(a.sellDate) : new Date(0);
+          bValue = b.sellDate ? new Date(b.sellDate) : new Date(0);
+          break;
+        case "profit":
+          aValue = a.profit;
+          bValue = b.profit;
+          break;
+        default:
+          return 0;
       }
 
-      return (
-        matchesSearch &&
-        matchesTab &&
-        matchesMarket &&
-        matchesAccount &&
-        matchesDateRange
-      );
+      if (aValue < bValue) {
+        return sortDirection === "asc" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortDirection === "asc" ? 1 : -1;
+      }
+      return 0;
     });
 
-    // Sort the filtered items
-    filtered.sort((a, b) => {
-      let aValue = a[sortField];
-      let bValue = b[sortField];
-
-      // Handle date fields
-      if (sortField === "buyDate" || sortField === "sellDate") {
-        aValue = aValue ? new Date(aValue as string).getTime() : 0;
-        bValue = bValue ? new Date(bValue as string).getTime() : 0;
-      }
-
-      // Handle numeric fields
-      if (typeof aValue === "number" && typeof bValue === "number") {
-        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
-      }
-
-      // Handle string fields
-      const aStr = String(aValue || "").toLowerCase();
-      const bStr = String(bValue || "").toLowerCase();
-
-      if (sortDirection === "asc") {
-        return aStr.localeCompare(bStr);
-      } else {
-        return bStr.localeCompare(aStr);
-      }
-    });
-
-    return filtered;
+    return sorted;
   }, [
     items,
     searchTerm,
-    activeTab,
     marketFilters,
     accountFilters,
-    dateRange,
     sortField,
     sortDirection,
+    activeTab,
+    dateRange,
   ]);
 
   const handleSort = (field: SortField) => {
-    if (sortField === field) {
+    if (field === sortField) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
@@ -634,19 +617,28 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     }
   };
 
-  // Calculate tab counts
-  const inventoryCount = items.filter(
-    (item) =>
-      item.status === "unsold" ||
-      item.status === "waiting_unlock" ||
-      item.status === "trade_ban",
+  // Get visible columns from settings, filtered to exclude removed columns
+  const visibleColumns = settings.columns
+    .filter((col) => col.visible)
+    .filter((col) => col.id !== "itemImage" && col.id !== "assetId");
+
+  // Count items for each tab
+  const inventoryCount = items.filter((item) =>
+    ["unsold", "waiting_unlock", "trade_ban"].includes(item.status),
   ).length;
   const historyCount = items.filter((item) => item.status === "sold").length;
 
-  const visibleColumns = settings.columns
-    .filter((col) => col.visible)
-    .filter((col) => col.id !== "itemImage" && col.id !== "assetId") // Hard filter
-    .sort((a, b) => a.order - b.order);
+  // Save settings when they change
+  useEffect(() => {
+    saveSettings(settings);
+  }, [settings]);
+
+  // Update sort direction for existing sorted field
+  useEffect(() => {
+    if (sortField === "buyDate" && sortDirection === "asc") {
+      setSortDirection("desc");
+    }
+  }, []);
 
   const markets = ["Lis-Skins", "Market.CSGO", "Steam Market"];
 
@@ -814,7 +806,11 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                               </div>
                               <div className="flex-1 min-w-0 pr-2">
                                 {(() => {
-                                  const { nameWithoutPrefixes, wearCondition, isStatTrak } = extractItemNameParts(item.itemName);
+                                  const {
+                                    nameWithoutPrefixes,
+                                    wearCondition,
+                                    isStatTrak,
+                                  } = extractItemNameParts(item.itemName);
                                   return (
                                     <div>
                                       <div className="flex items-center gap-2 flex-wrap">
@@ -822,8 +818,10 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                           <Badge
                                             className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 text-xs font-bold px-2 py-0.5 shadow-lg"
                                             style={{
-                                              background: 'linear-gradient(45deg, #ff6b35, #f7931e)',
-                                              boxShadow: '0 0 8px rgba(255, 107, 53, 0.4)',
+                                              background:
+                                                "linear-gradient(45deg, #ff6b35, #f7931e)",
+                                              boxShadow:
+                                                "0 0 8px rgba(255, 107, 53, 0.4)",
                                             }}
                                           >
                                             ST™
@@ -1192,12 +1190,30 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                               </div>
                               <div className="flex-1 min-w-0 pr-2">
                                 {(() => {
-                                  const { nameWithoutPrefixes, wearCondition, isStatTrak } =
-                                    extractItemNameParts(item.itemName);
+                                  const {
+                                    nameWithoutPrefixes,
+                                    wearCondition,
+                                    isStatTrak,
+                                  } = extractItemNameParts(item.itemName);
                                   return (
                                     <div>
-                                      <div className="font-medium break-words">
-                                        {nameWithoutWear}
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        {isStatTrak && (
+                                          <Badge
+                                            className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 text-xs font-bold px-2 py-0.5 shadow-lg"
+                                            style={{
+                                              background:
+                                                "linear-gradient(45deg, #ff6b35, #f7931e)",
+                                              boxShadow:
+                                                "0 0 8px rgba(255, 107, 53, 0.4)",
+                                            }}
+                                          >
+                                            ST™
+                                          </Badge>
+                                        )}
+                                        <span className="font-medium break-words">
+                                          {nameWithoutPrefixes}
+                                        </span>
                                       </div>
                                       {wearCondition && (
                                         <div className="text-xs text-muted-foreground mt-0.5">
