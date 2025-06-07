@@ -161,29 +161,41 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     }
   };
 
-  // Helper function to extract wear condition from item name
-  const extractWearCondition = (itemName: string) => {
+  // Helper function to extract StatTrak and wear condition from item name
+  const extractItemNameParts = (itemName: string) => {
+    let processedName = itemName;
+    let isStatTrak = false;
+
+    // Check for StatTrak™
+    if (processedName.startsWith("StatTrak™ ")) {
+      isStatTrak = true;
+      processedName = processedName.replace("StatTrak™ ", "");
+    }
+
+    // Extract wear condition
     const wearConditions = [
       "Factory New",
       "Minimal Wear",
       "Field-Tested",
       "Well-Worn",
-      "Battle-Scarred",
+      "Battle-Scarred"
     ];
 
+    let wearCondition = null;
     for (const condition of wearConditions) {
-      if (itemName.includes(`(${condition})`)) {
-        return {
-          nameWithoutWear: itemName.replace(` (${condition})`, ""),
-          wearCondition: condition,
-        };
+      if (processedName.includes(`(${condition})`)) {
+        wearCondition = condition;
+        processedName = processedName.replace(` (${condition})`, '');
+        break;
       }
     }
 
     return {
-      nameWithoutWear: itemName,
-      wearCondition: null,
+      nameWithoutPrefixes: processedName,
+      wearCondition,
+      isStatTrak
     };
+  };
   };
 
   const clearAllMarkets = () => {
