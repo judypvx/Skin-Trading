@@ -814,12 +814,24 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                               </div>
                               <div className="flex-1 min-w-0 pr-2">
                                 {(() => {
-                                  const { nameWithoutWear, wearCondition } =
-                                    extractWearCondition(item.itemName);
+                                  const { nameWithoutPrefixes, wearCondition, isStatTrak } = extractItemNameParts(item.itemName);
                                   return (
                                     <div>
-                                      <div className="font-medium break-words">
-                                        {nameWithoutWear}
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        {isStatTrak && (
+                                          <Badge
+                                            className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 text-xs font-bold px-2 py-0.5 shadow-lg"
+                                            style={{
+                                              background: 'linear-gradient(45deg, #ff6b35, #f7931e)',
+                                              boxShadow: '0 0 8px rgba(255, 107, 53, 0.4)',
+                                            }}
+                                          >
+                                            ST™
+                                          </Badge>
+                                        )}
+                                        <span className="font-medium break-words">
+                                          {nameWithoutPrefixes}
+                                        </span>
                                       </div>
                                       {wearCondition && (
                                         <div className="text-xs text-muted-foreground mt-0.5">
