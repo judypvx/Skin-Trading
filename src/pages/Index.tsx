@@ -288,8 +288,9 @@ const Index = () => {
         {/* Footer */}
         <footer className="mt-12 pt-6 border-t text-center text-sm text-muted-foreground">
           <p>
-            Skin Trading Dashboard v1.0 • Tracking {items.length} items across{" "}
-            {new Set(items.map((i) => i.market)).size} marketplaces •
+            Skin Trading Dashboard v1.0 • Tracking {filteredItems.length} items
+            across {new Set(filteredItems.map((i) => i.market)).size}{" "}
+            marketplaces •
             <Button variant="link" className="p-0 h-auto text-sm">
               Documentation
             </Button>
