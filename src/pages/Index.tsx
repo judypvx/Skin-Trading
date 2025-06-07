@@ -108,7 +108,7 @@ const Index = () => {
   };
 
   const handleExportTrades = () => {
-    const csvContent = items
+    const csvContent = filteredItems
       .map(
         (item) =>
           `${item.itemName},${item.buyPrice},${item.buyDate},${item.market},${item.status},${item.sellPrice || ""},${item.sellDate || ""},${item.profit},${item.profitPercentage}`,
