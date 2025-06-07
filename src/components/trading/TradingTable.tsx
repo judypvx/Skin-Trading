@@ -161,6 +161,31 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     }
   };
 
+  // Helper function to extract wear condition from item name
+  const extractWearCondition = (itemName: string) => {
+    const wearConditions = [
+      "Factory New",
+      "Minimal Wear",
+      "Field-Tested",
+      "Well-Worn",
+      "Battle-Scarred",
+    ];
+
+    for (const condition of wearConditions) {
+      if (itemName.includes(`(${condition})`)) {
+        return {
+          nameWithoutWear: itemName.replace(` (${condition})`, ""),
+          wearCondition: condition,
+        };
+      }
+    }
+
+    return {
+      nameWithoutWear: itemName,
+      wearCondition: null,
+    };
+  };
+
   const clearAllMarkets = () => {
     setMarketFilters([]);
   };
