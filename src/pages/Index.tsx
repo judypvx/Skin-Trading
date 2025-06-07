@@ -85,10 +85,16 @@ const Index = () => {
   };
 
   useEffect(() => {
-    const filteredItems = getFilteredItemsByTimePeriod(selectedTimePeriod);
+    const filteredItems = getFilteredItems(
+      selectedTimePeriod,
+      selectedAccounts,
+    );
     const newStats = calculateStats(filteredItems);
     setStats(newStats);
-  }, [items, selectedTimePeriod]);
+  }, [items, selectedTimePeriod, selectedAccounts]);
+
+  // Get filtered items for components
+  const filteredItems = getFilteredItems(selectedTimePeriod, selectedAccounts);
 
   const handleUpdateItem = (id: string, updates: Partial<TradingItem>) => {
     setItems((prev) =>
