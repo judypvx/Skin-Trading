@@ -1056,8 +1056,8 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
               </div>
             </div>
 
-            <div className="overflow-x-auto border rounded-lg">
-              <Table>
+            <div className="border rounded-lg w-full">
+              <Table className="w-full table-fixed">
                 <TableHeader>
                   <TableRow>
                     {visibleColumns.map((column) => (
