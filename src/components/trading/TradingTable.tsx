@@ -1011,7 +1011,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="gap-2">
+                      <Button variant="outline" size="sm" className="gap-2">
                         <Filter className="h-4 w-4" />
                         Markets{" "}
                         {marketFilters.length > 0 &&
