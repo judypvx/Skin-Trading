@@ -14,6 +14,7 @@ import StatsPanel from "@/components/trading/StatsPanel";
 import TradingTable from "@/components/trading/TradingTable";
 import ImportDialog from "@/components/trading/ImportDialog";
 import PortfolioChart from "@/components/trading/PortfolioChart";
+import AccountSelector from "@/components/trading/AccountSelector";
 import {
   TradingItem,
   mockTradingItems,
