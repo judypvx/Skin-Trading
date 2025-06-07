@@ -337,9 +337,12 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
       return (
         <div className="flex items-center justify-center">
           <div className={`text-center ${colorClass}`}>
-            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+            <div className="font-medium text-lg">
+              {formatCurrency(item.profit)}
+            </div>
+            <div className="flex items-center justify-center gap-1 whitespace-nowrap mt-1">
               <Icon className="h-3 w-3" />
-              <span className="font-medium">{formatCurrency(item.profit)}</span>
+              <span className="text-xs">Profit</span>
             </div>
             <div className="text-xs opacity-80 mt-0.5">
               ({formatPercentage(item.profitPercentage)})
