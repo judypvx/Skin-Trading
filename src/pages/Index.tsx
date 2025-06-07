@@ -222,6 +222,11 @@ const Index = () => {
         {/* Stats Panel */}
         <StatsPanel stats={stats} />
 
+        {/* Account Selector */}
+        <div className="mt-6">
+          <AccountSelector />
+        </div>
+
         {/* Portfolio Chart */}
         <div className="mt-6">
           <PortfolioChart items={items} timePeriod={selectedTimePeriod} />
