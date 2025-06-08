@@ -58,23 +58,21 @@ export interface EnhancedItemData {
   };
 }
 
-// Use local proxy server to bypass CORS restrictions
-const PROXY_BASE_URL = import.meta.env.PROD
-  ? "/api/csgo" // In production, proxy should be on same domain
-  : "http://localhost:3001/api/csgo"; // Development proxy server
+// Use public CORS proxy to bypass CORS restrictions
+const CORS_PROXY = "https://corsproxy.io/?";
+const API_BASE_URL = "https://bymykel.github.io/CSGO-API/api/en";
 
 const ENDPOINTS = {
-  all: `${PROXY_BASE_URL}/all`, // Optimized endpoint to get all data at once
-  skins: `${PROXY_BASE_URL}/skins`,
-  stickers: `${PROXY_BASE_URL}/stickers`,
-  agents: `${PROXY_BASE_URL}/agents`,
-  keychains: `${PROXY_BASE_URL}/keychains`,
-  graffiti: `${PROXY_BASE_URL}/graffiti`,
-  patches: `${PROXY_BASE_URL}/patches`,
-  music_kits: `${PROXY_BASE_URL}/music_kits`,
-  containers: `${PROXY_BASE_URL}/containers`,
-  keys: `${PROXY_BASE_URL}/keys`,
-  collectibles: `${PROXY_BASE_URL}/collectibles`,
+  skins: `${CORS_PROXY}${API_BASE_URL}/skins.json`,
+  stickers: `${CORS_PROXY}${API_BASE_URL}/stickers.json`,
+  agents: `${CORS_PROXY}${API_BASE_URL}/agents.json`,
+  keychains: `${CORS_PROXY}${API_BASE_URL}/keychains.json`,
+  graffiti: `${CORS_PROXY}${API_BASE_URL}/graffiti.json`,
+  patches: `${CORS_PROXY}${API_BASE_URL}/patches.json`,
+  music_kits: `${CORS_PROXY}${API_BASE_URL}/music_kits.json`,
+  containers: `${CORS_PROXY}${API_BASE_URL}/containers.json`,
+  keys: `${CORS_PROXY}${API_BASE_URL}/keys.json`,
+  collectibles: `${CORS_PROXY}${API_BASE_URL}/collectibles.json`,
 };
 
 const CATEGORY_COLORS: Record<ItemCategory, string> = {
@@ -103,7 +101,13 @@ class CSGOApiService {
       return this.fetchPromises.get(url);
     }
 
-    const fetchPromise = fetch(url)
+    const fetchPromise = fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -111,29 +115,13 @@ class CSGOApiService {
         return response.json();
       })
       .then((data) => {
-        // Handle proxy response format
-        let processedData = data;
-        if (data && typeof data === "object" && "success" in data) {
-          if (data.success && data.data) {
-            processedData = data.data;
-          } else {
-            throw new Error(data.error || "API request failed");
-          }
-        }
-
-        this.cache.set(url, processedData);
+        this.cache.set(url, data);
         this.fetchPromises.delete(url);
-        return processedData;
+        return data;
       })
       .catch((error) => {
         this.fetchPromises.delete(url);
-        console.warn(`Failed to fetch from ${url}:`, error);
-
-        // For the /all endpoint, return the error to be handled by getAllItems
-        if (url.includes("/all")) {
-          throw error;
-        }
-
+        console.warn(`Failed to fetch from ${url}:`, error.message);
         return [];
       });
 
