@@ -94,7 +94,9 @@ app.get("/api/csgo/:category", async (req, res) => {
   if (!ENDPOINTS[category]) {
     return res.status(404).json({
       success: false,
-      error: `Category '${category}' not found. Available categories: ${Object.keys(ENDPOINTS).join(", ")}`,
+      error: `Category '${category}' not found. Available categories: ${Object.keys(
+        ENDPOINTS,
+      ).join(", ")}`,
     });
   }
 
@@ -152,7 +154,9 @@ app.get("/api/csgo/all", async (req, res) => {
     );
 
     console.log(
-      `Successfully fetched ${totalItems} total items across ${Object.keys(allItems).length} categories`,
+      `Successfully fetched ${totalItems} total items across ${
+        Object.keys(allItems).length
+      } categories`,
     );
 
     res.json({
@@ -173,27 +177,6 @@ app.get("/api/csgo/all", async (req, res) => {
       error: error.message,
     });
   }
-});
-
-// Health check endpoint
-app.get("/api/health", (req, res) => {
-  res.json({
-    status: "ok",
-    timestamp: new Date().toISOString(),
-    cache: {
-      size: cache.size,
-      keys: Array.from(cache.keys()),
-    },
-  });
-});
-
-// Clear cache endpoint (for development)
-app.post("/api/clear-cache", (req, res) => {
-  cache.clear();
-  res.json({
-    success: true,
-    message: "Cache cleared",
-  });
 });
 
 // Process skins endpoint - fetches and transforms CS2 skins data
@@ -355,6 +338,27 @@ app.get("/api/skins", (req, res) => {
   }
 });
 
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    cache: {
+      size: cache.size,
+      keys: Array.from(cache.keys()),
+    },
+  });
+});
+
+// Clear cache endpoint (for development)
+app.post("/api/clear-cache", (req, res) => {
+  cache.clear();
+  res.json({
+    success: true,
+    message: "Cache cleared",
+  });
+});
+
 // Error handling middleware
 app.use((error, req, res, next) => {
   console.error("Unhandled error:", error);
@@ -372,6 +376,8 @@ app.use("*", (req, res) => {
     availableEndpoints: [
       "GET /api/csgo/:category",
       "GET /api/csgo/all",
+      "GET /api/process-skins",
+      "GET /api/skins",
       "GET /api/health",
       "POST /api/clear-cache",
     ],
