@@ -189,6 +189,161 @@ app.post("/api/clear-cache", (req, res) => {
   });
 });
 
+// Process skins endpoint - fetches and transforms CS2 skins data
+app.get("/api/process-skins", async (req, res) => {
+  const fs = require("fs");
+  const path = require("path");
+
+  try {
+    console.log("🔄 Processing CS2 skins data...");
+
+    // Fetch skins data from ByMykel API
+    const skinsData = await getCachedData("skins", ENDPOINTS.skins);
+
+    if (!skinsData || skinsData.length === 0) {
+      return res.status(500).json({
+        success: false,
+        error: "Failed to fetch skins data from API",
+      });
+    }
+
+    console.log(`📦 Processing ${skinsData.length} skins...`);
+
+    // Transform the data into the required structure
+    const processedSkins = skinsData.map((skin) => {
+      // Extract weapon name from skin name (everything before the first " | ")
+      const weaponMatch = skin.name ? skin.name.split(" | ")[0] : "";
+
+      // Get collections array - handle both string and array cases
+      let collections = [];
+      if (skin.crates && Array.isArray(skin.crates)) {
+        collections = skin.crates
+          .map((crate) => crate.name || crate)
+          .filter(Boolean);
+      } else if (skin.collections && Array.isArray(skin.collections)) {
+        collections = skin.collections
+          .map((collection) => collection.name || collection)
+          .filter(Boolean);
+      } else if (skin.collection) {
+        collections = [
+          typeof skin.collection === "string"
+            ? skin.collection
+            : skin.collection.name,
+        ];
+      }
+
+      // Process rarity
+      const rarity = skin.rarity
+        ? typeof skin.rarity === "string"
+          ? skin.rarity
+          : skin.rarity.name
+        : "Unknown";
+
+      return {
+        name: skin.name || "Unknown",
+        weapon: weaponMatch || "Unknown",
+        rarity: rarity,
+        min_float: typeof skin.min_float === "number" ? skin.min_float : 0,
+        max_float: typeof skin.max_float === "number" ? skin.max_float : 1,
+        image: skin.image || "",
+        collections: collections,
+        souvenir: Boolean(skin.souvenir),
+        stattrak: Boolean(skin.stattrak),
+      };
+    });
+
+    // Filter out items with no name or invalid data
+    const validSkins = processedSkins.filter(
+      (skin) =>
+        skin.name && skin.name !== "Unknown" && skin.name.trim().length > 0,
+    );
+
+    console.log(`✅ Successfully processed ${validSkins.length} valid skins`);
+
+    // Save to file if requested via query parameter
+    if (req.query.save === "true") {
+      try {
+        const dataDir = path.join(__dirname, "public", "data");
+        const filePath = path.join(dataDir, "skins.json");
+
+        // Ensure directory exists
+        if (!fs.existsSync(dataDir)) {
+          fs.mkdirSync(dataDir, { recursive: true });
+        }
+
+        // Write file with pretty formatting
+        fs.writeFileSync(filePath, JSON.stringify(validSkins, null, 2));
+        console.log(`💾 Saved ${validSkins.length} skins to ${filePath}`);
+
+        return res.json({
+          success: true,
+          message: `Processed and saved ${validSkins.length} skins`,
+          count: validSkins.length,
+          saved: true,
+          filePath: "/data/skins.json",
+          data: req.query.include_data === "true" ? validSkins : undefined,
+        });
+      } catch (saveError) {
+        console.error("Error saving file:", saveError);
+        return res.status(500).json({
+          success: false,
+          error: `Failed to save file: ${saveError.message}`,
+          count: validSkins.length,
+          data: validSkins,
+        });
+      }
+    }
+
+    // Return the processed data
+    res.json({
+      success: true,
+      message: `Successfully processed ${validSkins.length} skins`,
+      count: validSkins.length,
+      saved: false,
+      data: validSkins,
+    });
+  } catch (error) {
+    console.error("Error processing skins:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+// Get saved skins data endpoint
+app.get("/api/skins", (req, res) => {
+  const fs = require("fs");
+  const path = require("path");
+
+  try {
+    const filePath = path.join(__dirname, "public", "data", "skins.json");
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        error:
+          "Skins data file not found. Run /api/process-skins?save=true first.",
+      });
+    }
+
+    const data = fs.readFileSync(filePath, "utf8");
+    const skins = JSON.parse(data);
+
+    res.json({
+      success: true,
+      count: skins.length,
+      data: skins,
+    });
+  } catch (error) {
+    console.error("Error reading skins file:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 // Error handling middleware
 app.use((error, req, res, next) => {
   console.error("Unhandled error:", error);
