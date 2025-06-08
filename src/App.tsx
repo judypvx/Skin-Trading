@@ -20,7 +20,7 @@ const App = () => (
       disableTransitionOnChange
     >
       <TooltipProvider>
-        <div className="min-h-screen bg-black">
+        <div className="min-h-screen bg-background">
           <Toaster />
           <Sonner />
           <BrowserRouter>
