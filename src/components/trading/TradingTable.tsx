@@ -505,7 +505,12 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
   const getItemNameDisplay = (item: TradingItem) => {
     const { nameWithoutPrefixes, wearCondition, isStatTrak } =
       extractItemNameParts(item.itemName);
-    const itemData = getItemData(item.itemName);
+
+    // Try to get data from API first, then fallback to mock data
+    let itemData = getItemData(item.itemName);
+    if (!itemData) {
+      itemData = findMockItemData(item.itemName) || DEFAULT_ITEM_DATA;
+    }
 
     return (
       <div className="flex items-center gap-3 w-full">
