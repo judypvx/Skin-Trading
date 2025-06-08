@@ -247,6 +247,11 @@ const Index = () => {
           />
         </div>
 
+        {/* Skins Data Processor */}
+        <div className="mt-6">
+          <SkinsProcessor />
+        </div>
+
         {/* Portfolio Chart */}
         <div className="mt-6">
           <PortfolioChart
