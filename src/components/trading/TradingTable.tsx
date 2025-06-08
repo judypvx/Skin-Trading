@@ -818,54 +818,21 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                           <span
                                             className="font-medium select-none"
                                             style={{
-                                              fontSize: "9px",
-                                              padding: "1px 4px",
-                                              borderRadius: "2px",
-                                              backgroundColor: "#1a1a1a",
-                                              color: "#ff6600",
-                                              display: "inline-flex",
-                                              alignItems: "center",
-                                              justifyContent: "center",
-                                              marginRight: "5px",
-                                              letterSpacing: "0.01em",
+                                              fontSize: '9px',
+                                              padding: '1px 4px',
+                                              borderRadius: '8px',
+                                              backgroundColor: '#1a1a1a',
+                                              color: '#ff6600',
+                                              display: 'inline-flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              marginRight: '5px',
+                                              letterSpacing: '0.01em'
                                             }}
                                           >
                                             StatTrak™
                                           </span>
                                         )}
-                                        <span className="font-medium break-words">
-                                          {nameWithoutPrefixes}
-                                        </span>
-                                      </div>
-                                      {wearCondition && (
-                                        <div className="text-xs text-muted-foreground mt-0.5">
-                                          {wearCondition}
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-                            </div>
-                          )}
-                          {column.id === "buyPrice" && (
-                            <div className="flex items-center justify-center">
-                              <span className="font-medium">
-                                {formatCurrency(item.buyPrice)}
-                              </span>
-                            </div>
-                          )}
-                          {column.id === "buyDate" && (
-                            <div className="flex items-center justify-center">
-                              <span className="text-sm font-medium whitespace-nowrap">
-                                {formatDate(item.buyDate)}
-                              </span>
-                            </div>
-                          )}
-                          {column.id === "market" && (
-                            <div className="flex items-center justify-center">
-                              <Badge
-                                variant="outline"
                                 className="whitespace-nowrap"
                               >
                                 {item.market}
