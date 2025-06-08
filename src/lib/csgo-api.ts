@@ -290,7 +290,7 @@ class CSGOApiService {
     }
   }
 
-  findItemData(
+  findItemDataSync(
     itemName: string,
     itemMap: Map<string, EnhancedItemData>,
   ): EnhancedItemData | null {
@@ -315,6 +315,30 @@ class CSGOApiService {
     const cleanName = itemName.replace(/^StatTrak™\s+/, "");
     if (itemMap.has(cleanName)) {
       return itemMap.get(cleanName)!;
+    }
+
+    return null;
+  }
+
+  async findItemData(
+    itemName: string,
+    itemMap: Map<string, EnhancedItemData>,
+  ): Promise<EnhancedItemData | null> {
+    // Try synchronous search first
+    const syncResult = this.findItemDataSync(itemName, itemMap);
+    if (syncResult) {
+      return syncResult;
+    }
+
+    // Fallback to mock data for known items
+    try {
+      const { findMockItemData } = await import("./mock-csgo-data");
+      const mockData = findMockItemData(itemName);
+      if (mockData) {
+        return mockData;
+      }
+    } catch (error) {
+      console.warn("Failed to load mock data:", error);
     }
 
     return null;
