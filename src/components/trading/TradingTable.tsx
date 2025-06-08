@@ -25,6 +25,7 @@ import {
   History,
   X,
   Users,
+  HelpCircle,
 } from "lucide-react";
 import {
   TradingItem,
@@ -52,6 +53,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useCSGOApi } from "@/hooks/use-csgo-api";
+import { findMockItemData, DEFAULT_ITEM_DATA } from "@/lib/mock-csgo-data";
 
 interface TradingTableProps {
   items: TradingItem[];
@@ -95,6 +98,9 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     endDate: null,
     preset: "all-time",
   });
+
+  // CS:GO API integration
+  const { getItemData, loading: apiLoading, error: apiError } = useCSGOApi();
 
   const getDatePresetRange = (preset: string) => {
     const now = new Date();
@@ -495,6 +501,81 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
     );
   };
 
+  // Enhanced item name display with CS:GO API data
+  const getItemNameDisplay = (item: TradingItem) => {
+    const { nameWithoutPrefixes, wearCondition, isStatTrak } =
+      extractItemNameParts(item.itemName);
+    const itemData = getItemData(item.itemName);
+
+    return (
+      <div className="flex items-center gap-3 w-full">
+        <div className="flex-shrink-0">
+          {itemData?.image ? (
+            <img
+              src={itemData.image}
+              alt={item.itemName}
+              className="w-12 h-12 object-contain rounded"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src =
+                  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' fill='%23374151'/%3E%3Ctext x='24' y='24' text-anchor='middle' dominant-baseline='middle' fill='%23D1D5DB' font-size='8'%3EIMG%3C/text%3E%3C/svg%3E";
+              }}
+            />
+          ) : (
+            <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+              {apiLoading ? (
+                <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
+              ) : (
+                <HelpCircle className="w-6 h-6 text-muted-foreground" />
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0 pr-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Category Badge */}
+            <Badge
+              style={{ backgroundColor: itemData?.categoryColor || "#6b7280" }}
+              className="text-white border-0 text-xs px-2 py-0.5"
+            >
+              {itemData?.category || "Unknown"}
+            </Badge>
+
+            {/* StatTrak Badge */}
+            {isStatTrak && (
+              <span
+                className="font-medium select-none"
+                style={{
+                  fontSize: "9px",
+                  padding: "1px 4px",
+                  borderRadius: "8px",
+                  backgroundColor: "#1a1a1a",
+                  color: "#ff6600",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                StatTrak™
+              </span>
+            )}
+          </div>
+
+          <div className="mt-1">
+            <div className="font-medium break-words">{nameWithoutPrefixes}</div>
+            {wearCondition && (
+              <div className="text-xs text-muted-foreground mt-0.5">
+                {wearCondition}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const filteredAndSortedItems = useMemo(() => {
     let filtered = items.filter((item) => {
       // Tab filtering
@@ -648,8 +729,17 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <span>Trading Items</span>
+            {apiLoading && (
+              <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
+            )}
           </CardTitle>
         </div>
+
+        {apiError && (
+          <div className="text-sm text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded">
+            CS:GO API Warning: {apiError}. Using fallback display.
+          </div>
+        )}
 
         <Tabs
           value={activeTab}
@@ -741,7 +831,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                         key={column.id}
                         className={`hover:bg-muted/50 cursor-pointer text-center ${
                           column.id === "itemName"
-                            ? "w-1/4 min-w-[280px]"
+                            ? "w-1/3 min-w-[320px]"
                             : column.id === "buyPrice"
                               ? "w-[120px]"
                               : column.id === "buyDate"
@@ -787,67 +877,10 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                 </TableHeader>
                 <TableBody>
                   {filteredAndSortedItems.map((item) => (
-                    <TableRow key={item.id} className="hover:bg-muted/50 h-16">
+                    <TableRow key={item.id} className="hover:bg-muted/50 h-20">
                       {visibleColumns.map((column) => (
                         <TableCell key={column.id} className="py-4">
-                          {column.id === "itemName" && (
-                            <div className="flex items-center gap-2 w-full">
-                              <div className="flex-shrink-0">
-                                <img
-                                  src={`https://community.cloudflare.steamstatic.com/economy/image/${item.assetId || "placeholder"}/96fx96f`}
-                                  alt={item.itemName}
-                                  className="w-12 h-12 object-contain rounded"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.src =
-                                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' fill='%23374151'/%3E%3Ctext x='24' y='24' text-anchor='middle' dominant-baseline='middle' fill='%23D1D5DB' font-size='8'%3EIMG%3C/text%3E%3C/svg%3E";
-                                  }}
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0 pr-2">
-                                {(() => {
-                                  const {
-                                    nameWithoutPrefixes,
-                                    wearCondition,
-                                    isStatTrak,
-                                  } = extractItemNameParts(item.itemName);
-                                  return (
-                                    <div>
-                                      <div className="flex items-center">
-                                        {isStatTrak && (
-                                          <span
-                                            className="font-medium select-none"
-                                            style={{
-                                              fontSize: "9px",
-                                              padding: "1px 4px",
-                                              borderRadius: "8px",
-                                              backgroundColor: "#1a1a1a",
-                                              color: "#ff6600",
-                                              display: "inline-flex",
-                                              alignItems: "center",
-                                              justifyContent: "center",
-                                              marginRight: "5px",
-                                              letterSpacing: "0.01em",
-                                            }}
-                                          >
-                                            StatTrak™
-                                          </span>
-                                        )}
-                                        <span className="font-medium break-words">
-                                          {nameWithoutPrefixes}
-                                        </span>
-                                      </div>
-                                      {wearCondition && (
-                                        <div className="text-xs text-muted-foreground mt-0.5">
-                                          {wearCondition}
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-                            </div>
-                          )}
+                          {column.id === "itemName" && getItemNameDisplay(item)}
                           {column.id === "buyPrice" && (
                             <div className="flex items-center justify-center">
                               <span className="font-medium">
@@ -1131,7 +1164,7 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                         key={column.id}
                         className={`hover:bg-muted/50 cursor-pointer text-center ${
                           column.id === "itemName"
-                            ? "w-1/4 min-w-[280px]"
+                            ? "w-1/3 min-w-[320px]"
                             : column.id === "buyPrice"
                               ? "w-[120px]"
                               : column.id === "buyDate"
@@ -1177,67 +1210,10 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                 </TableHeader>
                 <TableBody>
                   {filteredAndSortedItems.map((item) => (
-                    <TableRow key={item.id} className="hover:bg-muted/50 h-16">
+                    <TableRow key={item.id} className="hover:bg-muted/50 h-20">
                       {visibleColumns.map((column) => (
                         <TableCell key={column.id} className="py-4">
-                          {column.id === "itemName" && (
-                            <div className="flex items-center gap-2 w-full">
-                              <div className="flex-shrink-0">
-                                <img
-                                  src={`https://community.cloudflare.steamstatic.com/economy/image/${item.assetId || "placeholder"}/96fx96f`}
-                                  alt={item.itemName}
-                                  className="w-12 h-12 object-contain rounded"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.src =
-                                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' fill='%23374151'/%3E%3Ctext x='24' y='24' text-anchor='middle' dominant-baseline='middle' fill='%23D1D5DB' font-size='8'%3EIMG%3C/text%3E%3C/svg%3E";
-                                  }}
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0 pr-2">
-                                {(() => {
-                                  const {
-                                    nameWithoutPrefixes,
-                                    wearCondition,
-                                    isStatTrak,
-                                  } = extractItemNameParts(item.itemName);
-                                  return (
-                                    <div>
-                                      <div className="flex items-center">
-                                        {isStatTrak && (
-                                          <span
-                                            className="font-medium select-none"
-                                            style={{
-                                              fontSize: "9px",
-                                              padding: "1px 4px",
-                                              borderRadius: "8px",
-                                              backgroundColor: "#1a1a1a",
-                                              color: "#ff6600",
-                                              display: "inline-flex",
-                                              alignItems: "center",
-                                              justifyContent: "center",
-                                              marginRight: "5px",
-                                              letterSpacing: "0.01em",
-                                            }}
-                                          >
-                                            StatTrak™
-                                          </span>
-                                        )}
-                                        <span className="font-medium break-words">
-                                          {nameWithoutPrefixes}
-                                        </span>
-                                      </div>
-                                      {wearCondition && (
-                                        <div className="text-xs text-muted-foreground mt-0.5">
-                                          {wearCondition}
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-                            </div>
-                          )}
+                          {column.id === "itemName" && getItemNameDisplay(item)}
                           {column.id === "buyPrice" && (
                             <div className="flex items-center justify-center">
                               <span className="font-medium">
