@@ -816,26 +816,61 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                       <div className="flex items-center">
                                         {isStatTrak && (
                                           <span
-                                            className="font-bold"
+                                            className="font-bold text-white select-none"
                                             style={{
-                                              fontSize: '10px',
-                                              padding: '3px 7px',
-                                              borderRadius: '4px',
-                                              backgroundColor: '#1a1a1a',
-                                              color: '#ff7b25',
-                                              display: 'inline-flex',
-                                              alignItems: 'center',
-                                              justifyContent: 'center',
-                                              marginRight: '8px',
-                                              border: '1px solid rgba(255, 123, 37, 0.3)',
-                                              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 123, 37, 0.1)',
-                                              textShadow: '0 1px 1px rgba(0, 0, 0, 0.5)',
-                                              letterSpacing: '0.02em'
+                                              fontSize: "10px",
+                                              padding: "3px 8px",
+                                              borderRadius: "4px",
+                                              background:
+                                                "linear-gradient(135deg, #1e1e1e 0%, #0a0a0a 100%)",
+                                              color: "#ff7b25",
+                                              display: "inline-flex",
+                                              alignItems: "center",
+                                              justifyContent: "center",
+                                              marginRight: "8px",
+                                              border:
+                                                "1px solid rgba(255, 123, 37, 0.25)",
+                                              boxShadow:
+                                                "0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 123, 37, 0.1)",
+                                              textShadow:
+                                                "0 1px 2px rgba(0, 0, 0, 0.8)",
+                                              letterSpacing: "0.025em",
+                                              textTransform: "uppercase",
                                             }}
                                           >
                                             StatTrak™
                                           </span>
                                         )}
+                                        <span className="font-medium break-words">
+                                          {nameWithoutPrefixes}
+                                        </span>
+                                      </div>
+                                      {wearCondition && (
+                                        <div className="text-xs text-muted-foreground mt-0.5">
+                                          {wearCondition}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+                          )}
+                          {column.id === "buyPrice" && (
+                            <div className="flex items-center justify-center">
+                              <span className="font-medium">
+                                {formatCurrency(item.buyPrice)}
+                              </span>
+                            </div>
+                          )}
+                          {column.id === "buyDate" && (
+                            <div className="flex items-center justify-center">
+                              <span className="text-sm font-medium whitespace-nowrap">
+                                {formatDate(item.buyDate)}
+                              </span>
+                            </div>
+                          )}
+                          {column.id === "market" && (
                             <div className="flex items-center justify-center">
                               <Badge
                                 variant="outline"
@@ -1179,18 +1214,26 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                       <div className="flex items-center">
                                         {isStatTrak && (
                                           <span
-                                            className="font-semibold"
+                                            className="font-bold text-white select-none"
                                             style={{
                                               fontSize: "10px",
-                                              padding: "2px 6px",
-                                              borderRadius: "6px",
-                                              backgroundColor:
-                                                "rgba(0, 0, 0, 0.8)",
-                                              color: "#ff6a00",
+                                              padding: "3px 8px",
+                                              borderRadius: "4px",
+                                              background:
+                                                "linear-gradient(135deg, #1e1e1e 0%, #0a0a0a 100%)",
+                                              color: "#ff7b25",
                                               display: "inline-flex",
                                               alignItems: "center",
                                               justifyContent: "center",
-                                              marginRight: "6px",
+                                              marginRight: "8px",
+                                              border:
+                                                "1px solid rgba(255, 123, 37, 0.25)",
+                                              boxShadow:
+                                                "0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 123, 37, 0.1)",
+                                              textShadow:
+                                                "0 1px 2px rgba(0, 0, 0, 0.8)",
+                                              letterSpacing: "0.025em",
+                                              textTransform: "uppercase",
                                             }}
                                           >
                                             StatTrak™
