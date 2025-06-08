@@ -12,9 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import NavigationTabs from "@/components/trading/NavigationTabs";
 import { StatsPanel } from "@/components/trading/StatsPanel";
 import { TradingTable } from "@/components/trading/TradingTable";
-import { PortfolioChart } from "@/components/trading/PortfolioChart";
-import { SkinsProcessor } from "@/components/trading/SkinsProcessor";
+import PortfolioChart from "@/components/trading/PortfolioChart";
 import AccountSelector from "@/components/trading/AccountSelector";
+import { SkinsProcessor } from "@/components/trading/SkinsProcessor";
 import {
   TradingItem,
   mockTradingItems,
