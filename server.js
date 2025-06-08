@@ -1,6 +1,13 @@
-const express = require("express");
-const cors = require("cors");
-const axios = require("axios");
+import express from "express";
+import cors from "cors";
+import axios from "axios";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// ES module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -191,9 +198,6 @@ app.post("/api/clear-cache", (req, res) => {
 
 // Process skins endpoint - fetches and transforms CS2 skins data
 app.get("/api/process-skins", async (req, res) => {
-  const fs = require("fs");
-  const path = require("path");
-
   try {
     console.log("🔄 Processing CS2 skins data from all.json...");
 
@@ -323,9 +327,6 @@ app.get("/api/process-skins", async (req, res) => {
 
 // Get saved skins data endpoint
 app.get("/api/skins", (req, res) => {
-  const fs = require("fs");
-  const path = require("path");
-
   try {
     const filePath = path.join(__dirname, "public", "data", "skins.json");
 
