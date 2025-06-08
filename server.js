@@ -195,19 +195,29 @@ app.get("/api/process-skins", async (req, res) => {
   const path = require("path");
 
   try {
-    console.log("🔄 Processing CS2 skins data...");
+    console.log("🔄 Processing CS2 skins data from all.json...");
 
-    // Fetch skins data from ByMykel API
-    const skinsData = await getCachedData("skins", ENDPOINTS.skins);
+    // Fetch all data from ByMykel API
+    const ALL_ENDPOINT = "https://bymykel.github.io/CSGO-API/api/en/all.json";
 
-    if (!skinsData || skinsData.length === 0) {
+    console.log("Fetching from:", ALL_ENDPOINT);
+    const response = await axios.get(ALL_ENDPOINT, {
+      timeout: 30000, // 30 second timeout
+      headers: {
+        "User-Agent": "CS:GO-Trading-Dashboard/1.0",
+      },
+    });
+
+    if (!response.data || !response.data.skins) {
       return res.status(500).json({
         success: false,
-        error: "Failed to fetch skins data from API",
+        error:
+          "Failed to fetch data from all.json or skins not found in response",
       });
     }
 
-    console.log(`📦 Processing ${skinsData.length} skins...`);
+    const skinsData = response.data.skins;
+    console.log(`📦 Processing ${skinsData.length} skins from all.json...`);
 
     // Transform the data into the required structure
     const processedSkins = skinsData.map((skin) => {
