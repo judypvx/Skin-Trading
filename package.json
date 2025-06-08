@@ -10,7 +10,9 @@
     "typecheck": "tsc",
     "server": "node server-fixed.js",
     "dev:server": "nodemon server-fixed.js",
-    "dev:full": "npm run dev:server & npm run dev"
+    "dev:full": "npm run dev:server & npm run dev",
+    "sync:builder": "node scripts/sync-to-builder.js",
+    "sync:builder:force": "node scripts/sync-to-builder.js --force"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
