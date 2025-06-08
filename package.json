@@ -8,8 +8,8 @@
     "test": "vitest --run",
     "format.fix": "prettier --write .",
     "typecheck": "tsc",
-    "server": "node server.js",
-    "dev:server": "nodemon server.js",
+    "server": "node server-fixed.js",
+    "dev:server": "nodemon server-fixed.js",
     "dev:full": "npm run dev:server & npm run dev"
   },
   "dependencies": {
