@@ -816,22 +816,51 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                       <div className="flex items-center">
                                         {isStatTrak && (
                                           <span
-                                            className="border-0 font-semibold mr-1.5"
+                                            className="font-semibold"
                                             style={{
-                                              fontSize: '10px',
-                                              padding: '2px 6px',
-                                              borderRadius: '6px',
-                                              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                              color: '#ff6a00',
-                                              display: 'inline-flex',
-                                              alignItems: 'center',
-                                              justifyContent: 'center',
-                                              marginRight: '6px'
+                                              fontSize: "10px",
+                                              padding: "2px 6px",
+                                              borderRadius: "6px",
+                                              backgroundColor:
+                                                "rgba(0, 0, 0, 0.8)",
+                                              color: "#ff6a00",
+                                              display: "inline-flex",
+                                              alignItems: "center",
+                                              justifyContent: "center",
+                                              marginRight: "6px",
                                             }}
                                           >
                                             StatTrak™
                                           </span>
                                         )}
+                                        <span className="font-medium break-words">
+                                          {nameWithoutPrefixes}
+                                        </span>
+                                      </div>
+                                      {wearCondition && (
+                                        <div className="text-xs text-muted-foreground mt-0.5">
+                                          {wearCondition}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+                          )}
+                          {column.id === "buyPrice" && (
+                            <div className="flex items-center justify-center">
+                              <span className="font-medium">
+                                {formatCurrency(item.buyPrice)}
+                              </span>
+                            </div>
+                          )}
+                          {column.id === "buyDate" && (
+                            <div className="flex items-center justify-center">
+                              <span className="text-sm font-medium whitespace-nowrap">
+                                {formatDate(item.buyDate)}
+                              </span>
+                            </div>
                           )}
                           {column.id === "market" && (
                             <div className="flex items-center justify-center">
@@ -1177,20 +1206,21 @@ const TradingTable = ({ items, onUpdateItem }: TradingTableProps) => {
                                       <div className="flex items-center">
                                         {isStatTrak && (
                                           <span
-                                            className="text-white border-0 font-semibold mr-1.5"
+                                            className="font-semibold"
                                             style={{
                                               fontSize: "10px",
                                               padding: "2px 6px",
                                               borderRadius: "6px",
-                                              background:
-                                                "linear-gradient(135deg, #ff944d 0%, #ff6a00 100%)",
+                                              backgroundColor:
+                                                "rgba(0, 0, 0, 0.8)",
+                                              color: "#ff6a00",
                                               display: "inline-flex",
                                               alignItems: "center",
                                               justifyContent: "center",
                                               marginRight: "6px",
                                             }}
                                           >
-                                            ST™
+                                            StatTrak™
                                           </span>
                                         )}
                                         <span className="font-medium break-words">
