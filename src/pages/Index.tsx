@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,66 +7,298 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import NavigationTabs from "@/components/trading/NavigationTabs";
+import StatsPanel from "@/components/trading/StatsPanel";
+import TradingTable from "@/components/trading/TradingTable";
+import ImportDialog from "@/components/trading/ImportDialog";
+import PortfolioChart from "@/components/trading/PortfolioChart";
+import AccountSelector from "@/components/trading/AccountSelector";
+import {
+  TradingItem,
+  mockTradingItems,
+  calculateStats,
+  TradingStats,
+} from "@/lib/trading-data";
+import {
+  BarChart3,
+  Settings,
+  TrendingUp,
+  FileText,
+  Download,
+  Upload,
+} from "lucide-react";
+import { toast } from "sonner";
 
 const Index = () => {
+  const [items, setItems] = useState<TradingItem[]>(mockTradingItems);
+  const [stats, setStats] = useState<TradingStats>(
+    calculateStats(mockTradingItems),
+  );
+  const [selectedTimePeriod, setSelectedTimePeriod] =
+    useState<string>("all-time");
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+
+  // Filter items by selected time period and accounts
+  const getFilteredItems = (timePeriod: string, accountIds: string[]) => {
+    let filteredItems = items;
+
+    // Filter by accounts first
+    if (accountIds.length > 0) {
+      filteredItems = filteredItems.filter((item) =>
+        accountIds.includes(item.accountId),
+      );
+    }
+
+    // Then filter by time period
+    if (timePeriod === "all-time") return filteredItems;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    let startDate: Date;
+
+    switch (timePeriod) {
+      case "today":
+        startDate = today;
+        break;
+      case "last-7-days":
+        startDate = new Date(today);
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case "this-month":
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      default:
+        return filteredItems;
+    }
+
+    return filteredItems.filter((item) => {
+      // For sold items, use sell date; for unsold items, use buy date
+      const itemDate =
+        item.status === "sold" && item.sellDate
+          ? new Date(item.sellDate)
+          : new Date(item.buyDate);
+      return itemDate >= startDate;
+    });
+  };
+
+  useEffect(() => {
+    const filteredItems = getFilteredItems(
+      selectedTimePeriod,
+      selectedAccounts,
+    );
+    const newStats = calculateStats(filteredItems);
+    setStats(newStats);
+  }, [items, selectedTimePeriod, selectedAccounts]);
+
+  // Get filtered items for components
+  const filteredItems = getFilteredItems(selectedTimePeriod, selectedAccounts);
+
+  const handleUpdateItem = (id: string, updates: Partial<TradingItem>) => {
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ...updates } : item)),
+    );
+  };
+
+  const handleImportSuccess = () => {
+    // In a real app, this would refresh the data from the API
+    toast.success("Import successful - refreshing data...");
+  };
+
+  const handleExportTrades = () => {
+    const csvContent = filteredItems
+      .map(
+        (item) =>
+          `${item.itemName},${item.buyPrice},${item.buyDate},${item.market},${item.status},${item.sellPrice || ""},${item.sellDate || ""},${item.profit},${item.profitPercentage}`,
+      )
+      .join("\n");
+
+    const blob = new Blob(
+      [
+        `Item Name,Buy Price,Buy Date,Market,Status,Sell Price,Sell Date,Profit,Profit %\n${csvContent}`,
+      ],
+      { type: "text/csv" },
+    );
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "trading-history.csv";
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    toast.success("Trading data exported to CSV");
+  };
+
+  const getProfitStatus = () => {
+    if (stats.totalProfit > 0) {
+      return {
+        status: "Profitable",
+        color: "text-green-600",
+        bgColor: "bg-green-100 dark:bg-green-900",
+      };
+    } else if (stats.totalProfit === 0) {
+      return {
+        status: "Break Even",
+        color: "text-yellow-600",
+        bgColor: "bg-yellow-100 dark:bg-yellow-900",
+      };
+    } else {
+      return {
+        status: "At Loss",
+        color: "text-red-600",
+        bgColor: "bg-red-100 dark:bg-red-900",
+      };
+    }
+  };
+
+  const profitStatus = getProfitStatus();
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <h1 className="text-4xl font-bold mb-6">CS:GO Trading Dashboard</h1>
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Navigation */}
+      <NavigationTabs />
 
-      <Card className="mb-6 bg-gray-800 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white">Dashboard Status</CardTitle>
-          <CardDescription className="text-gray-300">
-            Testing component loading step by step
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <p>✅ React is working</p>
-            <p>✅ Tailwind CSS is working</p>
-            <p>✅ Card component loaded</p>
+      {/* Main Content */}
+      <main className="max-w-[1600px] mx-auto px-4 py-6">
+        {/* Welcome Section */}
+        <div className="mb-6">
+          <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-primary/20">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <BarChart3 className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">
+                      Welcome back, Trader!
+                    </CardTitle>
+                    <CardDescription>
+                      Track and analyze your CS:GO skin investments across all
+                      marketplaces
+                    </CardDescription>
+                  </div>
+                </div>
+                <Badge
+                  className={`${profitStatus.bgColor} ${profitStatus.color}`}
+                >
+                  Portfolio {profitStatus.status}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span>Connected to Lis-Skins</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span>Connected to Market.CSGO</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <span>Steam Market</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Time Period Selector */}
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm font-medium text-muted-foreground">
+              Statistics for:
+            </span>
+            <div className="flex gap-1">
+              {[
+                { value: "today", label: "Today" },
+                { value: "last-7-days", label: "Last 7 Days" },
+                { value: "this-month", label: "This Month" },
+                { value: "all-time", label: "All Time" },
+              ].map((period) => (
+                <Button
+                  key={period.value}
+                  variant={
+                    selectedTimePeriod === period.value ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => setSelectedTimePeriod(period.value)}
+                  className="text-xs h-8"
+                >
+                  {period.label}
+                </Button>
+              ))}
+            </div>
           </div>
-        </CardContent>
-      </Card>
-
-      <div className="space-y-4">
-        <Button className="mr-4">Test Button</Button>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-gray-800 border-gray-700">
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-2">Total Items</h3>
-              <p className="text-2xl font-bold text-green-400">16</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gray-800 border-gray-700">
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-2">Total Profit</h3>
-              <p className="text-2xl font-bold text-green-400">$1,234.56</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gray-800 border-gray-700">
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-2">Active Markets</h3>
-              <p className="text-2xl font-bold text-blue-400">3</p>
-            </CardContent>
-          </Card>
         </div>
-      </div>
 
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">Next Steps</h2>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <ul className="space-y-2">
-            <li>✅ Basic components working</li>
-            <li>🔄 Add navigation</li>
-            <li>🔄 Add trading table</li>
-            <li>🔄 Add charts</li>
-          </ul>
+        {/* Stats Panel */}
+        <StatsPanel stats={stats} />
+
+        {/* Account Selector */}
+        <div className="mt-6">
+          <AccountSelector
+            selectedAccounts={selectedAccounts}
+            onAccountsChange={setSelectedAccounts}
+          />
         </div>
-      </div>
+
+        {/* Portfolio Chart */}
+        <div className="mt-6">
+          <PortfolioChart
+            items={filteredItems}
+            timePeriod={selectedTimePeriod}
+          />
+        </div>
+
+        <Separator className="my-6" />
+
+        {/* Action Bar */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex gap-2">
+            <ImportDialog onImportSuccess={handleImportSuccess} />
+          </div>
+
+          <div className="flex gap-2 ml-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportTrades}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Analytics
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
+            </Button>
+          </div>
+        </div>
+
+        {/* Trading Table */}
+        <TradingTable items={filteredItems} onUpdateItem={handleUpdateItem} />
+
+        {/* Footer */}
+        <footer className="mt-12 pt-6 border-t text-center text-sm text-muted-foreground">
+          <p>
+            CS:GO Trading Dashboard v1.0 • Tracking {filteredItems.length} items
+            across {new Set(filteredItems.map((i) => i.market)).size}{" "}
+            marketplaces •{" "}
+            <Button variant="link" className="p-0 h-auto text-sm">
+              Documentation
+            </Button>
+          </p>
+        </footer>
+      </main>
     </div>
   );
 };
