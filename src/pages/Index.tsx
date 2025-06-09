@@ -15,7 +15,6 @@ import TradingTable from "@/components/trading/TradingTable";
 import ImportDialog from "@/components/trading/ImportDialog";
 import PortfolioChart from "@/components/trading/PortfolioChart";
 import AccountSelector from "@/components/trading/AccountSelector";
-import { SkinsProcessor } from "@/components/trading/SkinsProcessor";
 import {
   TradingItem,
   mockTradingItems,
@@ -157,152 +156,176 @@ const Index = () => {
   const profitStatus = getProfitStatus();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <NavigationTabs />
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Test Content */}
+      <div className="p-8">
+        <h1 className="text-4xl font-bold text-white mb-4">
+          CS:GO Trading Dashboard
+        </h1>
+        <p className="text-lg text-gray-300 mb-8">
+          Welcome to your trading dashboard!
+        </p>
 
-      {/* Main Content */}
-      <main className="max-w-[1600px] mx-auto px-4 py-6">
-        {/* Welcome Section */}
-        <div className="mb-6">
-          <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-primary/20">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <BarChart3 className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">
-                      Welcome back, Trader!
-                    </CardTitle>
-                    <CardDescription>
-                      Track and analyze your CS:GO skin investments across all
-                      marketplaces
-                    </CardDescription>
-                  </div>
-                </div>
-                <Badge
-                  className={`${profitStatus.bgColor} ${profitStatus.color}`}
-                >
-                  Portfolio {profitStatus.status}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span>Connected to Lis-Skins</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span>Connected to Market.CSGO</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <span>Steam Market</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Simple test card */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Dashboard Status</CardTitle>
+            <CardDescription>
+              Testing if components are loading properly
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>Items loaded: {items.length}</p>
+            <p>Total profit: ${stats.totalProfit}</p>
+            <p>Status: {profitStatus.status}</p>
+          </CardContent>
+        </Card>
 
-        {/* Time Period Selector */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm font-medium text-muted-foreground">
-              Statistics for:
-            </span>
-            <div className="flex gap-1">
-              {[
-                { value: "today", label: "Today" },
-                { value: "last-7-days", label: "Last 7 Days" },
-                { value: "this-month", label: "This Month" },
-                { value: "all-time", label: "All Time" },
-              ].map((period) => (
-                <Button
-                  key={period.value}
-                  variant={
-                    selectedTimePeriod === period.value ? "default" : "outline"
-                  }
-                  size="sm"
-                  onClick={() => setSelectedTimePeriod(period.value)}
-                  className="text-xs h-8"
-                >
-                  {period.label}
-                </Button>
-              ))}
+        {/* Navigation */}
+        <NavigationTabs />
+
+        {/* Main Content */}
+        <main className="max-w-[1600px] mx-auto px-4 py-6">
+          {/* Welcome Section */}
+          <div className="mb-6">
+            <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-primary/20">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <BarChart3 className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">
+                        Welcome back, Trader!
+                      </CardTitle>
+                      <CardDescription>
+                        Track and analyze your CS:GO skin investments across all
+                        marketplaces
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Badge
+                    className={`${profitStatus.bgColor} ${profitStatus.color}`}
+                  >
+                    Portfolio {profitStatus.status}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span>Connected to Lis-Skins</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span>Connected to Market.CSGO</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <span>Steam Market</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Time Period Selector */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-sm font-medium text-muted-foreground">
+                Statistics for:
+              </span>
+              <div className="flex gap-1">
+                {[
+                  { value: "today", label: "Today" },
+                  { value: "last-7-days", label: "Last 7 Days" },
+                  { value: "this-month", label: "This Month" },
+                  { value: "all-time", label: "All Time" },
+                ].map((period) => (
+                  <Button
+                    key={period.value}
+                    variant={
+                      selectedTimePeriod === period.value
+                        ? "default"
+                        : "outline"
+                    }
+                    size="sm"
+                    onClick={() => setSelectedTimePeriod(period.value)}
+                    className="text-xs h-8"
+                  >
+                    {period.label}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Stats Panel */}
-        <StatsPanel stats={stats} />
+          {/* Stats Panel */}
+          <StatsPanel stats={stats} />
 
-        {/* Account Selector */}
-        <div className="mt-6">
-          <AccountSelector
-            selectedAccounts={selectedAccounts}
-            onAccountsChange={setSelectedAccounts}
-          />
-        </div>
-
-        {/* Skins Data Processor */}
-        <div className="mt-6">
-          <SkinsProcessor />
-        </div>
-
-        {/* Portfolio Chart */}
-        <div className="mt-6">
-          <PortfolioChart
-            items={filteredItems}
-            timePeriod={selectedTimePeriod}
-          />
-        </div>
-
-        <Separator className="my-6" />
-
-        {/* Action Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="flex gap-2">
-            <ImportDialog onImportSuccess={handleImportSuccess} />
+          {/* Account Selector */}
+          <div className="mt-6">
+            <AccountSelector
+              selectedAccounts={selectedAccounts}
+              onAccountsChange={setSelectedAccounts}
+            />
           </div>
 
-          <div className="flex gap-2 ml-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportTrades}
-              className="gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export CSV
-            </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Analytics
-            </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Settings className="h-4 w-4" />
-              Settings
-            </Button>
+          {/* Portfolio Chart */}
+          <div className="mt-6">
+            <PortfolioChart
+              items={filteredItems}
+              timePeriod={selectedTimePeriod}
+            />
           </div>
-        </div>
-        {/* Trading Table */}
-        <TradingTable items={filteredItems} onUpdateItem={handleUpdateItem} />
-        {/* Footer */}
-        <footer className="mt-12 pt-6 border-t text-center text-sm text-muted-foreground">
-          <p>
-            Skin Trading Dashboard v1.0 • Tracking {filteredItems.length} items
-            across {new Set(filteredItems.map((i) => i.market)).size}{" "}
-            marketplaces •
-            <Button variant="link" className="p-0 h-auto text-sm">
-              Documentation
-            </Button>
-          </p>
-        </footer>
-      </main>
+
+          <Separator className="my-6" />
+
+          {/* Action Bar */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex gap-2">
+              <ImportDialog onImportSuccess={handleImportSuccess} />
+            </div>
+
+            <div className="flex gap-2 ml-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportTrades}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Analytics
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Settings className="h-4 w-4" />
+                Settings
+              </Button>
+            </div>
+          </div>
+
+          {/* Trading Table */}
+          <TradingTable items={filteredItems} onUpdateItem={handleUpdateItem} />
+
+          {/* Footer */}
+          <footer className="mt-12 pt-6 border-t text-center text-sm text-muted-foreground">
+            <p>
+              Skin Trading Dashboard v1.0 • Tracking {filteredItems.length}{" "}
+              items across {new Set(filteredItems.map((i) => i.market)).size}{" "}
+              marketplaces •
+              <Button variant="link" className="p-0 h-auto text-sm">
+                Documentation
+              </Button>
+            </p>
+          </footer>
+        </main>
+      </div>
     </div>
   );
 };
