@@ -21,16 +21,18 @@ const CS2SkinsTable: React.FC = () => {
 
   const { data: skins = [], isLoading, error } = useCS2Skins();
 
-  // Filter skins based on search term and selected language
+  // Filter skins based on search term (searches both languages but displays according to toggle)
   const filteredSkins = useMemo(() => {
     if (!searchTerm) return skins;
 
     const searchLower = searchTerm.toLowerCase();
     return skins.filter((skin) => {
-      const nameField = language === "en" ? skin.name_en : skin.name_ru;
-      return nameField.toLowerCase().includes(searchLower);
+      // Search in both English and Russian names
+      const englishMatch = skin.name_en.toLowerCase().includes(searchLower);
+      const russianMatch = skin.name_ru.toLowerCase().includes(searchLower);
+      return englishMatch || russianMatch;
     });
-  }, [skins, searchTerm, language]);
+  }, [skins, searchTerm]); // Remove language dependency since we search both
 
   // Get rarity color for badges
   const getRarityColor = (rarity: string) => {
@@ -133,7 +135,7 @@ const CS2SkinsTable: React.FC = () => {
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={`Search skins in ${language === "en" ? "English" : "Russian"}...`}
+                placeholder="Search skins in both English and Russian..."
                 value={searchTerm}
                 onChange={handleSearchChange}
                 className="pl-10"
@@ -207,7 +209,7 @@ const CS2SkinsTable: React.FC = () => {
                     <td colSpan={6} className="py-8 text-center">
                       <div className="text-muted-foreground">
                         {searchTerm
-                          ? `No skins found matching "${searchTerm}" in ${language === "en" ? "English" : "Russian"}`
+                          ? `No skins found matching "${searchTerm}" in either language`
                           : "No skins found in database"}
                       </div>
                     </td>
@@ -300,7 +302,7 @@ const CS2SkinsTable: React.FC = () => {
       {!isLoading && skins.length > 0 && (
         <div className="mt-6 text-center text-sm text-muted-foreground">
           Displaying {filteredSkins.length} of {skins.length} total CS2 skins
-          {searchTerm && ` matching "${searchTerm}"`}
+          {searchTerm && ` matching "${searchTerm}" in both languages`}
         </div>
       )}
     </div>
