@@ -3,6 +3,7 @@ import { useCS2Skins, CS2Skin } from "@/hooks/use-cs2-skins";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/components/trading/NavigationTabs";
 import {
   Card,
   CardContent,
@@ -10,15 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Search, Loader2, AlertCircle, Languages } from "lucide-react";
+import { Search, Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-type Language = "en" | "ru";
-
 const CS2SkinsTable: React.FC = () => {
-  const [language, setLanguage] = useState<Language>("en");
   const [searchTerm, setSearchTerm] = useState("");
-
+  const { language } = useLanguage();
   const { data: skins = [], isLoading, error } = useCS2Skins();
 
   // Filter skins based on search term (searches both languages but displays according to toggle)
@@ -56,11 +54,6 @@ const CS2SkinsTable: React.FC = () => {
       default:
         return "bg-gray-400/10 text-gray-400 border-gray-400/20";
     }
-  };
-
-  // Toggle language
-  const toggleLanguage = () => {
-    setLanguage(language === "en" ? "ru" : "en");
   };
 
   // Handle search input change
@@ -103,34 +96,17 @@ const CS2SkinsTable: React.FC = () => {
         </p>
       </div>
 
-      {/* Controls Section */}
+      {/* Search Section */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-lg">Search & Language</CardTitle>
+          <CardTitle className="text-lg">Search Skins</CardTitle>
           <CardDescription>
-            Search for skins and switch between English and Russian names
+            Search for skins in both English and Russian names (language toggle
+            is in the top navigation)
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            {/* Language Toggle */}
-            <div className="flex items-center gap-2">
-              <Languages className="h-4 w-4 text-muted-foreground" />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleLanguage}
-                className="gap-2"
-              >
-                {language === "en" ? "EN" : "RU"}
-                <span className="text-xs text-muted-foreground">
-                  {language === "en"
-                    ? "Switch to Russian"
-                    : "Switch to English"}
-                </span>
-              </Button>
-            </div>
-
             {/* Search Input */}
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />

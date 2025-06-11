@@ -1,12 +1,58 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BarChart3, Users, Settings, Moon, Sun, Search } from "lucide-react";
+import {
+  BarChart3,
+  Users,
+  Settings,
+  Moon,
+  Sun,
+  Search,
+  Languages,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
+
+// Language context for managing language state across components
+import { createContext, useContext, useState, ReactNode } from "react";
+
+type Language = "en" | "ru";
+
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (language: Language) => void;
+  toggleLanguage: () => void;
+}
+
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined,
+);
+
+export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  const [language, setLanguage] = useState<Language>("en");
+
+  const toggleLanguage = () => {
+    setLanguage(language === "en" ? "ru" : "en");
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error("useLanguage must be used within a LanguageProvider");
+  }
+  return context;
+};
 
 const NavigationTabs = () => {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
+  const { language, toggleLanguage } = useLanguage();
 
   const tabs = [
     {
@@ -75,6 +121,19 @@ const NavigationTabs = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleLanguage}
+              className="gap-2"
+            >
+              <Languages className="h-4 w-4" />
+              {language === "en" ? "EN" : "RU"}
+              <span className="text-xs text-muted-foreground">
+                {language === "en" ? "Switch to Russian" : "Switch to English"}
+              </span>
+            </Button>
+
             <Button
               variant="ghost"
               size="icon"
