@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BarChart3, Users, Settings, Moon, Sun } from "lucide-react";
+import { BarChart3, Users, Settings, Moon, Sun, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 
@@ -20,6 +20,12 @@ const NavigationTabs = () => {
       label: "Account Control",
       icon: Users,
       description: "Steam Account Management",
+    },
+    {
+      path: "/explorer",
+      label: "Explorer",
+      icon: Search,
+      description: "Skin Catalog & Market Data",
     },
   ];
 
